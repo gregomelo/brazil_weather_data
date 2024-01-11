@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "brazil-weather-data"
+version = "0.1.0"
+description = "Brazil Weather Data API is a project to transform data from INMET (Brazilian Weather Institute) into a API using FastAPI and DuckDB"
+authors = ["Greg Oliveira <gregoryomelo@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.108.0"
+uvicorn = "^0.25.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.6.0"
+pytest = "^7.4.4"
+commitizen = "^3.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
