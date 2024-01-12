@@ -1,7 +1,7 @@
 import os
 from unittest.mock import MagicMock, patch
 
-from app.tools.general_tools import download_file, extract_zip
+from app.tools.general import download_file, extract_zip
 
 
 def test_download_file(tools_temp_folder):
@@ -61,7 +61,7 @@ def test_extract_zip(tools_temp_folder):
     """
     # Define test parameters
     test_zip_path = tools_temp_folder
-    test_zip_file = "test.zip"
+    test_zip_file = "file.zip"
 
     extract_to = os.path.join(test_zip_path, "extracted_data")
 
