@@ -1,0 +1,1 @@
+"""Pydocstyle constrain."""
