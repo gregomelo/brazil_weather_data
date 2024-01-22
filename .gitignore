@@ -179,6 +179,7 @@ pyrightconfig.json
 # Input and stage data
 data/input
 data/stage
+data/stage-test
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python
