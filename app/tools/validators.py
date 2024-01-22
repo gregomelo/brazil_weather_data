@@ -9,7 +9,7 @@ of their order.
 from datetime import datetime
 from typing import Any, List
 
-from pydantic import BaseModel, StringConstraints, validator
+from pydantic import BaseModel, StringConstraints, field_validator
 from typing_extensions import Annotated
 
 
@@ -99,7 +99,8 @@ class StationData(BaseModel):
     Altitude: Any
     FoundingDate: Any
 
-    @validator("Latitude", "Longitude", "Altitude", pre=True)
+    @field_validator("Latitude", "Longitude", "Altitude", mode="before")
+    @classmethod
     def parse_geo_coords(cls, value):
         """
         Parse and validate geographic coordinate values.
@@ -135,7 +136,8 @@ class StationData(BaseModel):
         except ValueError:
             raise ValueError(f"Geographic Coordinate Invalid: {value}")
 
-    @validator("FoundingDate", pre=True)
+    @field_validator("FoundingDate", mode="before")
+    @classmethod
     def parse_date(cls, value):
         """
         Parse and validate foundation dates in multiple formats.
@@ -176,21 +178,4 @@ class StationData(BaseModel):
 
 
 if __name__ == "__main__":
-    LIST_COLUMNS_VALID = [["A", "B"], ["B", "A"]]
-    LIST_COLUMNS_INVALID = [["C", "B"], ["B", "A"]]
-
-    try:
-        print(
-            "List with same elements:",
-            validate_sublists(LIST_COLUMNS_VALID),
-        )
-    except ValueError as e:
-        print("Error:", e)
-
-    try:
-        print(
-            "List with different elements:",
-            validate_sublists(LIST_COLUMNS_INVALID),
-        )
-    except ValueError as e:
-        print("Error:", e)
+    pass
