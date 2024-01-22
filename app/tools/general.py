@@ -5,6 +5,7 @@ downloading files from the internet and extract zip files.
 """
 
 import os
+import shutil
 import zipfile
 
 import httpx
@@ -16,37 +17,33 @@ def download_file(
     save_path: str,
     chunk_size: int = 128,
 ) -> None:
-    """Download a file from a given URL and save it to a specified path.
+    """
+    Download a file from a given URL and save it to a specified path.
 
     Parameters
     ----------
     url : str
         The URL of the file to be downloaded.
     file_name : str
-        The name of the file as it will be saved locally.
+        The name of the file to be saved locally.
     save_path : str
-        The local directory to save the downloaded file.
+        The local folder where the downloaded file will be saved.
     chunk_size : int, optional
-        The size of chunks to download at a time, by default 128 bytes.
+        The size of chunks for downloading the file, defaults to 128 bytes.
 
     Returns
     -------
     None
-        This function does not return anything. It writes the downloaded
-        file to the specified location.
+        The function writes the downloaded file to the specified location.
 
     Raises
     ------
     Exception
-        If any error occurs during the download or file writing process.
+        If an error occurs during the download or file writing process.
     """
-    # Ensure the save directory exists
     os.makedirs(save_path, exist_ok=True)
-
-    # Construct the full file path
     file_path = os.path.join(save_path, file_name)
 
-    # Attempt to download the file
     try:
         response = httpx.get(f"{url}{file_name}", follow_redirects=True)
         with open(file_path, "wb") as file:
@@ -59,36 +56,67 @@ def download_file(
         response.close()
 
 
-def extract_zip(zip_path: str, zip_file: str, extract_to: str) -> None:
-    """Extract a zip file to the specified directory.
+def extract_zip(
+    zip_path: str,
+    zip_file: str,
+    extract_to: str,
+) -> None:
+    """
+    Extract the contents of a zip file to the specified directory.
 
     Parameters
     ----------
     zip_path : str
-        Path to the zip file.
+        The path to the zip file.
     zip_file : str
-        Name of zip file.
+        The name of the zip file.
     extract_to : str
-        Directory where files will be extracted.
+        The directory where the contents of the zip file will be extracted.
     """
-    # Ensure the save directory exists
     os.makedirs(extract_to, exist_ok=True)
-
     file_path = os.path.join(zip_path, zip_file)
 
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         zip_ref.extractall(extract_to)
 
 
+def clear_folder(
+    folder_path: str,
+) -> None:
+    """Remove all files and subdirectories within a specified folder.
+
+    This function deletes all contents within the specified folder, including
+    files and subdirectories, while keeping the folder itself intact.
+
+    Parameters
+    ----------
+    folder_path : str
+        The path to the folder to be cleared.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified folder does not exist.
+    """
+    if not os.path.exists(folder_path):
+        raise FileNotFoundError(f"The folder {folder_path} does not exist.")
+
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        if os.path.isfile(item_path) or os.path.islink(item_path):
+            os.unlink(item_path)
+        elif os.path.isdir(item_path):
+            shutil.rmtree(item_path)
+
+
 if __name__ == "__main__":
-    # Constants for the INMET data download
     INMET_URL = "https://portal.inmet.gov.br/uploads/dadoshistoricos/"
     FILE_NAME = "2023.zip"
     SAVE_PATH = "data/input"
+    # download_file(INMET_URL, FILE_NAME, SAVE_PATH)
 
-    # Download the specified file
-    download_file(INMET_URL, FILE_NAME, SAVE_PATH)
-
-    # Constants for downloaded file
     STAGE_PATH = "data/stage"
-    extract_zip(SAVE_PATH, FILE_NAME, STAGE_PATH)
+    # extract_zip(SAVE_PATH, FILE_NAME, STAGE_PATH)
+
+    STAGE_TEST_PATH = "data/stage-test"
+    # clear_folder(STAGE_TEST_PATH)

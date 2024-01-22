@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.tools.general import download_file, extract_zip
+from app.tools.general import clear_folder, download_file, extract_zip
 
 
 @pytest.fixture(scope="module")
@@ -100,3 +100,41 @@ def test_extract_zip(tools_temp_folder):
 
     # Verify only one file was extracted
     assert files_extracted == 1
+
+
+def test_clear_folder(tools_temp_folder):
+    """
+    Test the clear_folder function to ensure it remove files from a folder.
+
+    This test checks if the clear_folder function correctly extracts all files
+    from a provided folder.
+
+    Parameters:
+    tools_temp_folder (str): The path to a temporary folder provided by a
+    fixture.
+
+    Asserts:
+    All files from the folder archive are removed from a target directory.
+
+    Note:
+    Considering that FileNotFoundError will not be tested considering that this
+    is a build-in function.
+    """
+    # Define test parameters
+    test_zip_path = tools_temp_folder
+
+    extract_to = os.path.join(test_zip_path, "extracted_data")
+
+    clear_folder(extract_to)
+
+    # Count extracted files
+    files_extracted = len(
+        [
+            name
+            for name in os.listdir(extract_to)
+            if os.path.isfile(os.path.join(extract_to, name))
+        ],
+    )
+
+    # Verify only one file was extracted
+    assert files_extracted == 0
