@@ -10,7 +10,8 @@ from typing import Dict, List
 
 import pandas as pd
 from pydantic import ValidationError
-from validators import StationData, validate_sublists
+
+from .validators import StationData, validate_sublists
 
 
 class StationDataCollector:
@@ -151,14 +152,15 @@ class StationDataCollector:
             except ValidationError as e:
                 invalid_records_log.append({"record": row, "error": str(e)})
 
-        log_path = os.path.join(
-            output_path,
-            file_name + "_invalid_records.log",
-        )
-        os.makedirs(os.path.dirname(log_path), exist_ok=True)
-        with open(log_path, "w") as log_file:
-            for log_entry in invalid_records_log:
-                log_file.write(str(log_entry) + "\n")
+        if len(invalid_records_log) > 0:
+            log_path = os.path.join(
+                output_path,
+                file_name + "_invalid_records.log",
+            )
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "w") as log_file:
+                for log_entry in invalid_records_log:
+                    log_file.write(str(log_entry) + "\n")
 
         if len(valid_records) > 0:
             validate_data = pd.DataFrame(valid_records)
