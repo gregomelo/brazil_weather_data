@@ -55,7 +55,7 @@ class TestValidateSublists:
         list_with_equal_elements_equal_order (list): The input provided by
         a fixture.
         """
-        assert validate_sublists(self, list_with_equal_elements_equal_order)
+        assert validate_sublists(list_with_equal_elements_equal_order)
 
     def test_equal_elements_and_different_order(
         self,
