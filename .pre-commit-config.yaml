@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: autopep8
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
     -   id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -42,14 +42,14 @@ repos:
         additional_dependencies: [types-all]
 # Bandit hook avoing B101 (assert statement) on tests folder
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.6
+    rev: 1.7.7
     hooks:
       - id: bandit
         args: ["--skip", "B101"]
         files: tests/
 # Bandit hook on the remain project folders
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.6
+    rev: 1.7.7
     hooks:
       - id: bandit
         exclude: tests/
