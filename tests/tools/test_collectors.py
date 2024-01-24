@@ -8,7 +8,7 @@ import pytest
 from app.tools.collectors import StationDataCollector
 from app.tools.validators import StationData
 
-# Constants to use in tests
+# Constants for test
 STATION_COLUMN_NAMES = {
     "REGIAO:": "Region",
     "UF:": "State",
@@ -27,7 +27,15 @@ def create_files(
     destiny_folder: pathlib.Path,
     data_to_files: List[str],
 ) -> None:
-    """Helper function to create text files based in a list."""
+    """Create CSV files from a list of CSV content strings in a specified folder.
+
+    Parameters
+    ----------
+    destiny_folder : pathlib.Path
+        Destination folder where CSV files will be created.
+    data_to_files : List[str]
+        List of strings, each representing the content of a CSV file.
+    """
     for file_number, csv_data in enumerate(data_to_files):
         file_name = "file_" + str(file_number) + ".csv"
         file = destiny_folder / file_name
@@ -36,7 +44,18 @@ def create_files(
 
 @pytest.fixture()
 def tmp_station_valid_data(tmp_path):
-    """Create a temp folder to test StationDataCollector with valid data."""
+    """Create a temporary directory with valid station data for testing.
+
+    Parameters
+    ----------
+    tmp_path : py.path.local
+        Fixture provided by pytest to create and return temporary directories.
+
+    Yields
+    ------
+    tuple
+        A tuple containing the path to the valid staging data and the output directory.
+    """
     temp_stage_valid = tmp_path / "stage-valid"
     temp_stage_valid.mkdir()
     temp_output_valid = tmp_path / "output-valid"
@@ -94,14 +113,23 @@ Data;Hora UTC;PRECIPITAÇÃO TOTAL, HORÁRIO (mm);PRESSAO ATMOSFERICA AO NIVEL D
 
     create_files(temp_stage_valid, csv_data_infos)
 
-    print(tmp_path)
-
     yield temp_stage_valid, temp_output_valid
 
 
 @pytest.fixture()
 def tmp_station_invalid_data(tmp_path):
-    """Create a temp folder to test StationDataCollector with invalid data."""
+    """Create a temporary directory with invalid station data for testing.
+
+    Parameters
+    ----------
+    tmp_path : py.path.local
+        Fixture provided by pytest to create and return temporary directories.
+
+    Yields
+    ------
+    tuple
+        A tuple containing the path to the invalid staging data and the output directory.
+    """
     temp_stage_invalid = tmp_path / "stage-invalid"
     temp_stage_invalid.mkdir()
     temp_output_invalid = tmp_path / "output-invalid"
@@ -147,7 +175,7 @@ UF:;AM
 ESTACAO:;COARI
 CODIGO (WMO):;A117
 LATITUDE:;-4,09749999
-LONGITUDE:;-63,14527777
+LONGITUDE:;aaaaaaaa
 ALTITUDE:;33,84
 DATA DE FUNDACAO:;12/04/08
 Data;Hora UTC;PRECIPITAÇÃO TOTAL, HORÁRIO (mm);PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB);PRESSÃO ATMOSFERICA MAX.NA HORA ANT. (AUT) (mB);PRESSÃO ATMOSFERICA MIN. NA HORA ANT. (AUT) (mB);RADIACAO GLOBAL (Kj/m²);TEMPERATURA DO AR - BULBO SECO, HORARIA (°C);TEMPERATURA DO PONTO DE ORVALHO (°C);TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C);TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C);TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C);TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C);UMIDADE REL. MAX. NA HORA ANT. (AUT) (%);UMIDADE REL. MIN. NA HORA ANT. (AUT) (%);UMIDADE RELATIVA DO AR, HORARIA (%);VENTO, DIREÇÃO HORARIA (gr) (° (gr));VENTO, RAJADA MAXIMA (m/s);VENTO, VELOCIDADE HORARIA (m/s);
@@ -165,7 +193,18 @@ Data;Hora UTC;PRECIPITAÇÃO TOTAL, HORÁRIO (mm);PRESSAO ATMOSFERICA AO NIVEL D
 
 @pytest.fixture()
 def tmp_station_mixed_data(tmp_path):
-    """Create a temporary folder to test the StationDataCollector with mixed data."""
+    """Create a temporary directory with mixed (valid and invalid) station data for testing.
+
+    Parameters
+    ----------
+    tmp_path : py.path.local
+        Fixture provided by pytest to create and return temporary directories.
+
+    Yields
+    ------
+    tuple
+        A tuple containing the path to the mixed staging data and the output directory.
+    """
     temp_stage_mixed = tmp_path / "stage-mixed"
     temp_stage_mixed.mkdir()
     temp_output_mixed = tmp_path / "output-mixed"
@@ -228,18 +267,21 @@ Data;Hora UTC;PRECIPITAÇÃO TOTAL, HORÁRIO (mm);PRESSAO ATMOSFERICA AO NIVEL D
 
 
 class TestStationDataCollector:
-    def test_collecting_empty_folder(self, tmp_path_factory):
-        """Test StationData class to ensure it raise an error when
-        scan a empty folder.
+    def test_collecting_empty_folder(
+        self,
+        tmp_path_factory,
+    ):
+        """Ensure StationDataCollector raises an error when scanning an empty folder.
 
-        This test simulates a start method using an empty folder.
+        Parameters
+        ----------
+        tmp_path_factory : fixture
+            Pytest fixture that provides a factory for temporary directories.
 
-        Parameters:
-        tmp_path_factory : The path to a temporary folder provided by a
-        fixture.
-
-        Asserts:
-        The class will raise an error when pointed to an empty folder.
+        Asserts
+        ------
+        ValueError
+            Expected error when the collector encounters an empty folder.
         """
         stage_empty = tmp_path_factory.mktemp("stage_empty")
         output_empty = tmp_path_factory.mktemp("output_empty")
@@ -252,24 +294,32 @@ class TestStationDataCollector:
             StationData,
         )
 
+        output_file = STATIONS_FILE + ".parquet"
+
+        output_empty_file_path = output_empty / output_file
+
         with pytest.raises(ValueError) as excinfo:
             stations_data.start()
         assert "No CSV files found in the specified folder." in str(
             excinfo.value,
         )
+        assert not os.path.exists(output_empty_file_path)
 
-    def test_collecting_valid_data(self, tmp_station_valid_data):
-        """Test the StationData class to ensure the log file creation.
+    def test_collecting_valid_data(
+        self,
+        tmp_station_valid_data,
+    ):
+        """Ensure StationDataCollector does not create a log file when processing valid data.
 
-        This test simulates a start method using a folder with valid data.
-        After the method, any log file should be created.
+        Parameters
+        ----------
+        tmp_station_valid_data : fixture
+            Fixture providing a directory with valid CSV data.
 
-        Parameters:
-        tmp_path_factory : The path to a temporary folder provided by a
-        fixture.
-
-        Asserts:
-        The class will raise an error when pointed to an empty folder.
+        Asserts
+        ------
+        bool
+            No log file is created and an output file exists.
         """
         stage_valid, output_valid = tmp_station_valid_data
 
@@ -283,9 +333,94 @@ class TestStationDataCollector:
 
         stations_data.start()
 
-        log_file_path = output_valid / (STATIONS_FILE + "_invalid_records.log")
+        log_file = STATIONS_FILE + "_invalid_records.log"
+
+        log_file_path = output_valid / log_file
+
+        output_file = STATIONS_FILE + ".parquet"
+
+        output_valid_file_path = output_valid / output_file
 
         assert not os.path.exists(log_file_path)
+        assert os.path.exists(output_valid_file_path)
+
+    def test_collecting_invalid_data(
+        self,
+        tmp_station_invalid_data,
+    ):
+        """Ensure StationDataCollector creates a log file when processing invalid data.
+
+        Parameters
+        ----------
+        tmp_station_invalid_data : fixture
+            Fixture providing a directory with invalid CSV data.
+
+        Asserts
+        ------
+        Exception
+            Expected error when the collector encounters only invalid data.
+        """
+        stage_invalid, output_invalid = tmp_station_invalid_data
+
+        stations_data = StationDataCollector(
+            stage_invalid,
+            output_invalid,
+            STATIONS_FILE,
+            STATION_COLUMN_NAMES,
+            StationData,
+        )
+
+        log_file = STATIONS_FILE + "_invalid_records.log"
+        log_file_path = output_invalid / log_file
+
+        output_file = STATIONS_FILE + ".parquet"
+        output_invalid_file_path = output_invalid / output_file
+
+        with pytest.raises(Exception) as excinfo:
+            stations_data.start()
+        assert "All collected data was invalid." in str(
+            excinfo.value,
+        )
+        assert os.path.exists(log_file_path)
+        assert not os.path.exists(output_invalid_file_path)
+
+    def test_collecting_mixed_data(
+        self,
+        tmp_station_mixed_data,
+    ):
+        """Ensure StationDataCollector handles mixed data correctly.
+
+        Parameters
+        ----------
+        tmp_station_mixed_data : fixture
+            Fixture providing a directory with mixed CSV data.
+
+        Asserts
+        ------
+        bool
+            A log file is created for invalid records and an output file exists.
+        """
+        stage_mixed, output_mixed = tmp_station_mixed_data
+
+        stations_data = StationDataCollector(
+            stage_mixed,
+            output_mixed,
+            STATIONS_FILE,
+            STATION_COLUMN_NAMES,
+            StationData,
+        )
+
+        output_file = STATIONS_FILE + ".parquet"
+        output_mixed_file_path = output_mixed / output_file
+
+        log_file = STATIONS_FILE + "_invalid_records.log"
+        log_file_path = output_mixed / log_file
+
+        stations_data.start()
+
+        assert os.path.exists(log_file_path)
+
+        assert os.path.exists(output_mixed_file_path)
 
 
 if __name__ == "__main__":
