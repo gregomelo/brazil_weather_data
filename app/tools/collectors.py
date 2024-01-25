@@ -6,6 +6,7 @@ This module provides utility functions for data collection.
 
 import glob
 import os
+from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pandas as pd
@@ -198,6 +199,81 @@ class StationDataCollector:
             )
         except Exception as e:
             print(f"Error to convert data to parquet: {e}")
+
+
+def limit_years() -> tuple[int, int]:
+    """Calculate the valid year range for data collection.
+
+    Determines the earliest year from which data can be collected and the
+    latest valid year based on the current date.
+
+    Returns
+    -------
+    tuple[int, int]
+        A tuple containing two integers:
+        - The first integer is the earliest year from which data collection
+        is valid.
+        - The second integer is the latest valid year for data collection
+        based on the current date.
+    """
+    FIRST_YEAR_WITH_DATA = 2000
+    current_day = datetime.now().day
+    last_year_month = datetime.today() - timedelta(current_day + 1)
+    last_valid_year = last_year_month.year
+
+    return FIRST_YEAR_WITH_DATA, last_valid_year
+
+
+def collect_years_list(
+    list_years: List[int],
+) -> List[int]:
+    """Extract the valid years from a list.
+
+    This function collects years beginning in 2000 and ending in the
+    year from the last month. It filters out any years that are not
+    integers or are outside the valid range.
+
+    Parameters
+    ----------
+    list_years : List[int]
+        List with the years that will be processed.
+
+    Returns
+    -------
+    List[int]
+        A list containing only the valid years within the specified range.
+
+    Raises
+    ------
+    ValueError
+        If the list is empty or contains no valid years.
+    """
+    first_year, last_year = limit_years()
+    valid_years = []
+    invalid_years = []
+
+    if len(list_years) == 0:
+        raise ValueError(
+            f"The list is empty. Provide a list with years after {first_year} and before {last_year}.",  # noqa
+        )
+
+    for year in list_years:
+        if not isinstance(year, int):
+            invalid_years.append(year)
+        elif first_year <= year <= last_year:
+            valid_years.append(year)
+        else:
+            invalid_years.append(year)
+
+    if len(valid_years) == 0:
+        raise ValueError(
+            f"The list is empty. Provide a list with years after {first_year} and before {last_year}.",  # noqa
+        )
+
+    if len(invalid_years) > 0:
+        print(f"The elements {invalid_years} were removed from the list.")
+
+    return valid_years
 
 
 if __name__ == "__main__":

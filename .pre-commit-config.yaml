@@ -23,6 +23,7 @@ repos:
     rev: v3.1.0
     hooks:
     -   id: add-trailing-comma
+        exclude: test_collectors.py
   - repo: https://github.com/psf/black
     rev: 23.12.1
     hooks:

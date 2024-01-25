@@ -5,9 +5,11 @@ from typing import List
 
 import pytest
 
-from app.tools.collectors import StationDataCollector
+# fmt: off
+from app.tools.collectors import StationDataCollector, collect_years_list, limit_years
 from app.tools.validators import StationData
 
+# fmt: on
 # Constants for test
 STATION_COLUMN_NAMES = {
     "REGIAO:": "Region",
@@ -27,7 +29,8 @@ def create_files(
     destiny_folder: pathlib.Path,
     data_to_files: List[str],
 ) -> None:
-    """Create CSV files from a list of CSV content strings in a specified folder.
+    """Create CSV files from a list of CSV content strings in a specified
+    folder.
 
     Parameters
     ----------
@@ -54,7 +57,8 @@ def tmp_station_valid_data(tmp_path):
     Yields
     ------
     tuple
-        A tuple containing the path to the valid staging data and the output directory.
+        A tuple containing the path to the valid staging data and the output
+        directory.
     """
     temp_stage_valid = tmp_path / "stage-valid"
     temp_stage_valid.mkdir()
@@ -266,6 +270,86 @@ Data;Hora UTC;PRECIPITAÇÃO TOTAL, HORÁRIO (mm);PRESSAO ATMOSFERICA AO NIVEL D
     yield temp_stage_mixed, temp_output_mixed
 
 
+@pytest.fixture()
+def list_with_invalid_int_years():
+    """Provide a list of integer years that are not valid for data collection,
+    as they precede the established start year.
+
+    This fixture is used to simulate scenarios where the data collector receives
+    years that are outside the scope of the collection period.
+
+    Returns
+    -------
+    list
+        A list containing integer years that fall before the first year from
+        which data collection is considered valid.
+    """
+    return [1998, 1988, 1999]
+
+
+@pytest.fixture()
+def list_with_invalid_str_years():
+    """Supply a list of strings that are not valid year representations for
+    testing the data collector's year filtering.
+
+    This fixture is useful for testing the data collector's ability to ignore
+    non-integer inputs when filtering years.
+
+    Returns
+    -------
+    list
+        A list containing strings that are invalid as year inputs.
+    """
+    return ["A", "B", "C"]
+
+
+@pytest.fixture()
+def list_with_valid_years():
+    """Provide a list of integer years that are all within the valid data
+    collection range for testing.
+
+    Returns
+    -------
+    list
+        A list containing only valid integer years, starting from the first
+        year data collection is considered valid.
+    """
+    return [2000, 2010, 2023]
+
+
+@pytest.fixture()
+def list_with_mix_int_years():
+    """Generate a list with a mix of valid and invalid integer years for
+    testing the data collector's filtering logic.
+
+    This fixture helps to ensure that the data collector correctly identifies
+    and filters out years that are not within the valid range.
+
+    Returns
+    -------
+    list
+        A list containing a combination of valid and invalid integer years.
+    """
+    return [1999, 2010, 2023]
+
+
+@pytest.fixture()
+def list_with_mix_int_str_years():
+    """Produce a list with a combination of valid integer years and invalid
+    string representations for testing year filtering.
+
+    This fixture aids in testing the data collector's robustness in handling
+    mixed data types in year lists.
+
+    Returns
+    -------
+    list
+        A list that includes both valid integer years and strings that
+        represent invalid years.
+    """
+    return ["A", 2010, 2023]
+
+
 class TestStationDataCollector:
     def test_collecting_empty_folder(
         self,
@@ -421,6 +505,124 @@ class TestStationDataCollector:
         assert os.path.exists(log_file_path)
 
         assert os.path.exists(output_mixed_file_path)
+
+
+first_year, last_year = limit_years()
+
+
+class TestCollectYearsList:
+    def test_empty_list(self):
+        """Test the behavior of collect_years_list when provided with an
+        empty list.
+
+        An empty list should trigger a ValueError to indicate that valid years
+        are required for processing.
+
+        Raises
+        ------
+        ValueError
+            If the provided list is empty.
+        """
+        empty_list = []
+        with pytest.raises(ValueError) as excinfo:
+            collect_years_list(empty_list)
+        assert (
+            f"The list is empty. Provide a list with years after {first_year} and before {last_year}."
+            in str(excinfo.value)
+        )
+
+    def test_all_valid_years(
+        self,
+        list_with_valid_years,
+    ):
+        """Test collect_years_list with a list containing only valid years.
+
+        The function should return the same list of years if all are valid
+        within the accepted range.
+
+        Parameters
+        ----------
+        list_with_valid_years : list
+            A list of years that are all valid and within the collection range.
+        """
+        result_list = collect_years_list(list_with_valid_years)
+
+        assert result_list == [2000, 2010, 2023]
+
+    def test_all_invalid_years(
+        self,
+        list_with_invalid_int_years,
+        list_with_invalid_str_years,
+    ):
+        """Test collect_years_list with lists that contain only invalid years.
+
+        The function is expected to raise a ValueError indicating that no
+        valid years were provided.
+
+        Parameters
+        ----------
+        list_with_invalid_int_years : list
+            A list of integers representing years, all of which are invalid.
+        list_with_invalid_str_years : list
+            A list of strings, none of which are valid representations of years.
+
+        Raises
+        ------
+        ValueError
+            If the list does not contain any valid years.
+        """
+        with pytest.raises(ValueError) as excinfo:
+            collect_years_list(list_with_invalid_int_years)
+        assert (
+            f"The list is empty. Provide a list with years after {first_year} and before {last_year}."
+            in str(excinfo.value)
+        )
+
+        with pytest.raises(ValueError) as excinfo:
+            collect_years_list(list_with_invalid_str_years)
+        assert (
+            f"The list is empty. Provide a list with years after {first_year} and before {last_year}."
+            in str(excinfo.value)
+        )
+
+    def test_mixed_list(
+        self,
+        list_with_mix_int_years,
+        list_with_mix_int_str_years,
+        capsys,
+    ):
+        """Test collect_years_list with lists that contain a mixture of valid
+        and invalid years or strings.
+
+        Valid years should be returned and invalid ones should be reported via
+        standard output.
+
+        Parameters
+        ----------
+        list_with_mix_int_years : list
+            A list containing a mix of valid and invalid integer years.
+        list_with_mix_int_str_years : list
+            A list containing both valid integer years and invalid string years.
+        capsys : fixture
+            Pytest fixture that captures standard output and error streams.
+        """
+        result_with_int = collect_years_list(list_with_mix_int_years)
+
+        assert result_with_int == [2010, 2023]
+
+        assert (
+            capsys.readouterr().out
+            == "The elements [1999] were removed from the list.\n"
+        )
+
+        result_with_str = collect_years_list(list_with_mix_int_str_years)
+
+        assert result_with_str == [2010, 2023]
+
+        assert (
+            capsys.readouterr().out
+            == "The elements ['A'] were removed from the list.\n"
+        )
 
 
 if __name__ == "__main__":
