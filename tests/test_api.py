@@ -12,4 +12,4 @@ def test_main_status_code():
 
 def test_main_response():
     response = client.get("/")
-    assert response.json() == {"Hello": "World"}
+    assert response.json() == {"message": "Hello, World!"}
