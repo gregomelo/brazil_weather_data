@@ -12,7 +12,10 @@ from typing import Dict, List
 import pandas as pd
 from pydantic import ValidationError
 
-from .validators import StationData, validate_sublists
+try:
+    from .validators import StationData, validate_sublists  # type: ignore
+except ImportError:
+    from validators import StationData, validate_sublists  # type: ignore
 
 
 class StationDataCollector:
