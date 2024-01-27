@@ -91,7 +91,7 @@ class StationData(BaseModel):
             min_length=4,
             max_length=4,
             to_upper=True,
-            pattern="A\d{3}",  # noqa
+            pattern="[A-Z]\d{3}",  # noqa
         ),
     ]
     Latitude: Any
