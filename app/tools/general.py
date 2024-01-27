@@ -52,8 +52,8 @@ def download_file(
     except Exception as e:
         print(f"Error during download: {e}")
     finally:
-        # Ensure the response is closed properly
-        response.close()
+        if response:
+            response.close()
 
 
 def extract_zip(
