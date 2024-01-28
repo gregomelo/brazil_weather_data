@@ -77,7 +77,8 @@ class StationDataCollector:
         Raises
         ------
         ValueError
-            If no CSV files are found in the specified directory.
+            If no CSV files are found in the specified
+            directory.
         """
         # Collecting all CSV file paths from the input folder
         files = glob.glob(os.path.join(self._input_folder, "*.csv"))
@@ -143,13 +144,13 @@ class StationDataCollector:
         Exception
             If all collected data is invalid.
         """
-        brute_data = pd.concat(all_data)
-        brute_data = brute_data.rename(columns=column_names)
+        raw_data = pd.concat(all_data)
+        raw_data = raw_data.rename(columns=column_names)
 
         valid_records = []
         invalid_records_log = []
 
-        for _, row in brute_data.iterrows():
+        for _, row in raw_data.iterrows():
             try:
                 valid_row = self._schema(**row.to_dict())
                 valid_records.append(valid_row.model_dump())
@@ -169,6 +170,11 @@ class StationDataCollector:
         if len(valid_records) > 0:
             validate_data = pd.DataFrame(valid_records)
             validate_data = validate_data.drop_duplicates(["IdStationWho"])
+            # fmt: off
+            validate_data["FoundingDate"] = validate_data["FoundingDate"].astype(  # noqa: E501
+                "datetime64[ns]",
+            )
+            # fmt: on
             return validate_data
         else:
             raise Exception("All collected data was invalid.")
