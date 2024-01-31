@@ -13,9 +13,9 @@ import pandas as pd
 from pydantic import ValidationError
 
 try:
-    from .validators import StationData, validate_sublists  # type: ignore
+    from .validators import validate_sublists  # type: ignore
 except ImportError:
-    from validators import StationData, validate_sublists  # type: ignore
+    from validators import validate_sublists  # type: ignore
 
 
 class StationDataCollector:
@@ -283,33 +283,3 @@ def collect_years_list(
         print(f"The elements {invalid_years} were removed from the list.")
 
     return valid_years
-
-
-if __name__ == "__main__":
-    # Constants for data collection
-    STAGE_PATH = "data/stage-test"
-
-    STATION_COLUMN_NAMES = {
-        "REGIAO:": "Region",
-        "UF:": "State",
-        "ESTACAO:": "StationName",
-        "CODIGO (WMO):": "IdStationWho",
-        "LATITUDE:": "Latitude",
-        "LONGITUDE:": "Longitude",
-        "ALTITUDE:": "Altitude",
-        "DATA DE FUNDACAO:": "FoundingDate",
-    }
-
-    OUTPUT_PATH = "data/output"
-
-    STATIONS_FILE = "stations"
-
-    stations_data = StationDataCollector(
-        STAGE_PATH,
-        OUTPUT_PATH,
-        STATIONS_FILE,
-        STATION_COLUMN_NAMES,
-        StationData,
-    )
-
-    stations_data.start()

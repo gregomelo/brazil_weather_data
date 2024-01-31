@@ -91,7 +91,7 @@ class StationData(BaseModel):
             min_length=4,
             max_length=4,
             to_upper=True,
-            pattern="[A-Z]\d{3}",  # noqa
+            pattern=r"[A-Z]\d{3}",  # noqa
         ),
     ]
     Latitude: Any
@@ -175,7 +175,3 @@ class StationData(BaseModel):
             except ValueError:
                 pass
         raise ValueError(f"Foundation Date Invalid: {value}")
-
-
-if __name__ == "__main__":
-    pass

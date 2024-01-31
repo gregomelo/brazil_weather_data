@@ -107,16 +107,3 @@ def clear_folder(
             os.unlink(item_path)
         elif os.path.isdir(item_path):
             shutil.rmtree(item_path)
-
-
-if __name__ == "__main__":
-    INMET_URL = "https://portal.inmet.gov.br/uploads/dadoshistoricos/"
-    FILE_NAME = "2023.zip"
-    SAVE_PATH = "data/input"
-    # download_file(INMET_URL, FILE_NAME, SAVE_PATH)
-
-    STAGE_PATH = "data/stage"
-    # extract_zip(SAVE_PATH, FILE_NAME, STAGE_PATH)
-
-    STAGE_TEST_PATH = "data/stage-test"
-    # clear_folder(STAGE_TEST_PATH)

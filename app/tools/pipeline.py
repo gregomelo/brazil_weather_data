@@ -92,25 +92,26 @@ def run_pipeline(
     print("Finish the pipeline.")
 
 
+# Pipeline Parameters
+years_list = [2023]
+
+INMET_URL = "https://portal.inmet.gov.br/uploads/dadoshistoricos/"
+SAVE_PATH = "data/input"
+STAGE_PATH = "data/stage"
+OUTPUT_PATH = "data/output"
+STATIONS_FILE = "stations"
+STATION_COLUMN_NAMES = {
+    "REGIAO:": "Region",
+    "UF:": "State",
+    "ESTACAO:": "StationName",
+    "CODIGO (WMO):": "IdStationWho",
+    "LATITUDE:": "Latitude",
+    "LONGITUDE:": "Longitude",
+    "ALTITUDE:": "Altitude",
+    "DATA DE FUNDACAO:": "FoundingDate",
+}
+
 if __name__ == "__main__":
-    years_list = [2023]
-
-    INMET_URL = "https://portal.inmet.gov.br/uploads/dadoshistoricos/"
-    SAVE_PATH = "data/input"
-    STAGE_PATH = "data/stage"
-    OUTPUT_PATH = "data/output"
-    STATIONS_FILE = "stations"
-    STATION_COLUMN_NAMES = {
-        "REGIAO:": "Region",
-        "UF:": "State",
-        "ESTACAO:": "StationName",
-        "CODIGO (WMO):": "IdStationWho",
-        "LATITUDE:": "Latitude",
-        "LONGITUDE:": "Longitude",
-        "ALTITUDE:": "Altitude",
-        "DATA DE FUNDACAO:": "FoundingDate",
-    }
-
     run_pipeline(
         years_list,
         INMET_URL,
