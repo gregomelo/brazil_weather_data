@@ -5,6 +5,7 @@ import os
 
 import duckdb
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 
 from app.tools.pipeline import OUTPUT_PATH, STATIONS_FILE
 from app.tools.validators import IdStationWhoType
@@ -52,6 +53,12 @@ app = FastAPI(
     description=API_DESCRIPTION,
     openapi_tags=tags_metadata,
 )
+
+
+@app.get("/")
+def root() -> None:
+    """Redirect user to API documentation."""
+    return RedirectResponse(url="/docs")
 
 
 def query_db(sql_query: str) -> list:
