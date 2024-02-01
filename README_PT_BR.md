@@ -6,6 +6,8 @@
 ## Introdução
 O projeto Dados Meteorológicos do Brasil é uma iniciativa puramente educacional voltada à transformação dos dados das estações meteorológicas automáticas brasileiras em uma API leve. Este projeto serve como um excelente recurso para aprendizagem e experimentação no desenvolvimento de API, manipulação de dados e práticas modernas de engenharia de software.
 
+A API é hospedada em uma serviço gratuíto do [Render](https://brazil-weather-data.onrender.com/). Sendo assim, a etapa de criação da base de dados foi feita localmente e depois carregada no repositório do projeto.
+
 ## Objetivo do Projeto
 O objetivo principal deste projeto é fornecer acesso fácil e estruturado aos dados meteorológicos das estações meteorológicas brasileiras. A API oferece três principais endpoints:
 - `stations_data`: Fornece dados sobre as estações meteorológicas, incluindo localização geográfica e data de implementação.
