@@ -19,12 +19,33 @@ def test_client():
         yield client
 
 
+def test_main_route(test_client):
+    """Run tests on root route.
+
+
+    Parameters
+    ----------
+    test_client : TestClient
+        An instance of TestClient for making requests to the FastAPI app.
+
+
+    """
+    response = test_client.get("/")
+    assert response.status_code == 200
+    assert response.url == "http://testserver/docs"
+
+
 class TestStationsRoute:
     """Run tests on stations routes.
 
     Notes
     -------
     These tests could be done using test parameters to avoid repetition.
+
+    Asserts
+    -------
+    The '/' route should return a status code of 200, and redirect user to
+    the API documentation.
     """
 
     def test_stations_route(
