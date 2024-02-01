@@ -5,9 +5,9 @@ This module provides full data pipeline.
 
 from typing import Dict, List
 
-from collectors import StationDataCollector, collect_years_list
-from general import clear_folder, download_file, extract_zip
-from validators import StationData
+from .collectors import StationDataCollector, collect_years_list
+from .general import clear_folder, download_file, extract_zip
+from .validators import StationData
 
 
 def run_pipeline(

@@ -50,6 +50,18 @@ def validate_sublists(list_with_sublists: List[List[str]]) -> bool:
         raise ValueError("Sublists do not have the same elements.")
 
 
+# IdStationType definition was created to share this field between the modules
+IdStationWhoType = Annotated[
+    str,
+    StringConstraints(
+        min_length=4,
+        max_length=4,
+        to_upper=True,
+        pattern=r"[A-Z]\d{3}",  # noqa
+    ),
+]
+
+
 class StationData(BaseModel):
     """
     A Pydantic model to validate station data.
@@ -85,15 +97,7 @@ class StationData(BaseModel):
         ),
     ]
     StationName: Annotated[str, StringConstraints(to_upper=True)]
-    IdStationWho: Annotated[
-        str,
-        StringConstraints(
-            min_length=4,
-            max_length=4,
-            to_upper=True,
-            pattern=r"[A-Z]\d{3}",  # noqa
-        ),
-    ]
+    IdStationWho: IdStationWhoType
     Latitude: Any
     Longitude: Any
     Altitude: Any
