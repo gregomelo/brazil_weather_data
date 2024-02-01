@@ -27,11 +27,11 @@ tags_metadata = [
     },
     {
         "name": "weather",
-        "description": "*Future* Detailed meteorological data.",
+        "description": "*Future.* Detailed meteorological data.",
     },
     {
         "name": "query",
-        "description": "*Future* Simulate SQL queries for customized data"
+        "description": "*Future.* Simulate SQL queries for customized data"
         "analysis. This queries will be run with DuckDB.",
         "externalDocs": {
             "description": "DuckDB. SQL Introduction",
@@ -40,10 +40,9 @@ tags_metadata = [
     },
     {
         "name": "update",
-        "description": "This endpoint will not implement due resource"
-        "restrictions. However, this could use the"
-        "pipeline module to update weather database."
-        "",
+        "description": "This endpoint will not be implemented due to "
+        "resource restrictions in the Render free tier. However, this could "
+        "use the pipeline module to update the weather database.",
     },
 ]
 
@@ -115,7 +114,7 @@ def list_stations():
     - Altitude
     - FoundingDate
 
-    This information can be used in the query route to build the SQL
+    *Future.* This information can be used in the query route to build the SQL
     statements.
     """
     query_sql = f"SELECT * FROM '{stations_db}'"  # nosec B608
