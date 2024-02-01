@@ -1,0 +1,60 @@
+
+# Brazil Weather Data API
+
+[Ler em Português](./README_PT_BR.md)
+
+## Introduction
+The Brazil Weather Data project is a purely educational initiative aimed at transforming the data from Brazilian automatic weather stations into a lightweight API. This project serves as an excellent resource for learning and experimentation with API development, data handling, and modern software engineering practices.
+
+## Project Objective
+The primary goal of this project is to provide easy and structured access to meteorological data from Brazilian weather stations. The API offers three main endpoints:
+- `stations_data`: Provides data about the weather stations, including geographical location and date of implementation.
+- `weather_data`: Offers meteorological data collected from the stations.
+- `query`: Allows users to simulate SQL queries for customized data retrieval.
+
+## Data Source
+The data is sourced from the Brazilian National Institute of Meteorology (INMET - [Instituto Nacional de Meteorologia](https://portal.inmet.gov.br/)), ensuring reliability and comprehensiveness.
+
+## Refactoring and Technical Stack
+This project is a refactored version of a [Kaggle notebook](https://www.kaggle.com/code/gregoryoliveira/brazil-weather-change-part-i-data-collection) focused on collecting and analyzing Brazilian weather data. The technical stack for this project includes:
+- pandas for data wrangling.
+- FastAPI for building the API.
+- DuckDB as the database management system.
+- pytest for running tests.
+- Pre-commit and Commitizen to ensure code quality and standardized commit messages.
+- Continuous Integration and Continuous Deployment (CI/CD) using GitHub Actions.
+
+## Database and Scalability
+Initially, the database for this project was populated locally due to resource constraints. This approach ensured a solid foundation for our initial data analysis and API functionality. However, in a professional setting, the system is designed to be scalable and automated.
+
+Ideally, the data collection pipeline would be set up to run automatically on a monthly basis. This would allow the database to be continuously updated with the latest weather data. Such a setup would not only provide real-time insights but also enrich the database over time, enhancing the depth and accuracy of our analyses.
+
+This automated approach, combined with a more robust hosting solution, would make the project more dynamic and valuable for ongoing weather data analysis and research.
+
+## Installation
+To get started with the Brazil Weather Data API, follow these steps:
+1. Ensure you have [Poetry](https://python-poetry.org/) installed on your system for dependency management.
+2. Clone the repository from GitHub:
+   ```bash
+   git clone https://github.com/gregomelo/brazil_weather_data.git
+   ```
+3. Navigate to the cloned directory and install the dependencies using Poetry:
+   ```bash
+   cd brazil_weather_data
+   poetry install
+   ```
+
+## Upcoming Features
+- Comprehensive documentation rendered with Mkdocs.
+- Additional API features and enhancements.
+
+## Contribution
+As an educational project, contributions are highly encouraged. Whether you're looking to fix bugs, add features, or improve documentation, your input is welcome. Please follow the standard GitHub flow for contributions.
+
+## License
+This project is open-sourced under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+Enjoy exploring and utilizing the Brazil Weather Data API! 🌦️🇧🇷
+
+---
