@@ -6,6 +6,8 @@
 ## Introduction
 The Brazil Weather Data project is a purely educational initiative aimed at transforming the data from Brazilian automatic weather stations into a lightweight API. This project serves as an excellent resource for learning and experimentation with API development, data handling, and modern software engineering practices.
 
+This API is hosted in a free tier webservice on [Render](https://brazil-weather-data.onrender.com/). Due the resource avaliable, the data is ingested in a local machine and only upload to the repository.
+
 ## Project Objective
 The primary goal of this project is to provide easy and structured access to meteorological data from Brazilian weather stations. The API offers three main endpoints:
 - `stations_data`: Provides data about the weather stations, including geographical location and date of implementation.

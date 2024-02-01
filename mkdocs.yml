@@ -1,0 +1,34 @@
+site_name: Brazilian Weather Data
+theme:
+  name: material
+  language: en
+
+repo-name: "gregomelo/brazil_weather_data"
+repo_url: "https://github.com/gregomelo/brazil_weather_data"
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+
+nav:
+  - Home: index.md
+  - Tools:
+    - General: app/tools/general.md
+    - Validators: app/tools/validators.md
+    - Collectors: app/tools/collectors.md
+    - Pipeline: app/tools/pipeline.md
+  - API:
+    - Routes: app/api.md
+  - Tests:
+    - API: tests/test_api.md
+    - Tools:
+      - General: tests/tools/test_general.md
+      - Validators: tests/tools/test_validators.md
+      - Collectors: tests/tools/test_collectors.md
