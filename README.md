@@ -8,6 +8,8 @@ The Brazil Weather Data project is a purely educational initiative aimed at tran
 
 This API is hosted in a free tier webservice on [Render](https://brazil-weather-data.onrender.com/). Due the resource avaliable, the data is ingested in a local machine and only upload to the repository.
 
+You can access the documentation at [GitHub](https://gregomelo.github.io/brazil_weather_data/).
+
 ## Project Objective
 The primary goal of this project is to provide easy and structured access to meteorological data from Brazilian weather stations. The API offers three main endpoints:
 - `stations_data`: Provides data about the weather stations, including geographical location and date of implementation.
@@ -46,9 +48,58 @@ To get started with the Brazil Weather Data API, follow these steps:
    poetry install
    ```
 
-## Upcoming Features
-- Comprehensive documentation rendered with Mkdocs.
-- Additional API features and enhancements.
+## Usage
+### Starting the webservice API:
+1. Run the following commands:
+   ```bash
+   poetry run task run
+   ```
+2. Open your favorite browser and navigate to [Brazil Weather Data API](http://127.0.0.1:8000/docs).
+
+Note: if your are running other service on 8000 port, you need to edit the running port on `[tool.taskipy.tasks]` section at `pyproject.toml` file.
+
+If you want to kill all other process on 8000 port, you can use the command:
+   ```bash
+   poetry run task killr
+   ```
+
+### Accessing local documentation:
+1. Run the following commands:
+
+```bash
+poetry run task run
+```
+
+2. Open your favorite browser and navigate to [Brazil Weather Data API Docs](http://127.0.0.1:8001).
+
+Note: if your are running other service on 8001 port, you need to edit the running port on `[tool.taskipy.tasks]` section at `pyproject.toml` file.
+
+If you want to kill all other process on 8001 port, you can use the command:
+   ```bash
+   poetry run task killd
+   ```
+
+### Running tests
+Run the following commands:
+   ```bash
+   poetry run task test
+   ```
+
+### Running the data pipeline
+Run the following commands:
+   ```bash
+   poetry run task pipeline -- list_years
+   ```
+
+For example, to run the pipeline only for 2023:
+   ```bash
+   poetry run task pipeline -- 2023
+   ```
+
+For more than one year, digit years with a simple-space between then:
+   ```bash
+   poetry run task pipeline -- 2023 2022 2021
+   ```
 
 ## Contribution
 As an educational project, contributions are highly encouraged. Whether you're looking to fix bugs, add features, or improve documentation, your input is welcome. Please follow the standard GitHub flow for contributions.

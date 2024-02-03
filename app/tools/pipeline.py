@@ -3,6 +3,7 @@
 This module provides full data pipeline.
 """
 
+import argparse
 from typing import Dict, List
 
 from .collectors import StationDataCollector, collect_years_list
@@ -93,8 +94,6 @@ def run_pipeline(
 
 
 # Pipeline Parameters
-years_list = [2023]
-
 INMET_URL = "https://portal.inmet.gov.br/uploads/dadoshistoricos/"
 SAVE_PATH = "data/input"
 STAGE_PATH = "data/stage"
@@ -112,8 +111,19 @@ STATION_COLUMN_NAMES = {
 }
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Run the data collection pipeline for specified years.",
+    )
+    parser.add_argument(
+        "years_list",
+        nargs="+",
+        type=int,
+        help="List of years to process.",
+    )
+    args = parser.parse_args()
+
     run_pipeline(
-        years_list,
+        args.years_list,
         INMET_URL,
         SAVE_PATH,
         STAGE_PATH,
