@@ -51,8 +51,7 @@ jobs:
       - name: Install dependencies with poetry
         run: poetry install --only docs
 
-      - name: Setting user
-        run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
-
       - name: Build and deploy MkDocs site
         run: poetry run mkdocs gh-deploy --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAGES_DEPLOY }}
