@@ -54,4 +54,4 @@ jobs:
       - name: Build and deploy MkDocs site
         run: poetry run mkdocs gh-deploy --force
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAGES_DEPLOY }}
