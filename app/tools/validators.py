@@ -502,7 +502,7 @@ class WeatherData(BaseModel):
         """
         try:
             if value:
-                return float(value.replace(",", "."))
+                return float(str(value).replace(",", "."))
             else:
                 return None
         except ValueError:
@@ -551,7 +551,7 @@ class WeatherData(BaseModel):
         points and ensuring data integrity.
         """
         if value:
-            float_parsed = float(value.replace(",", "."))
+            float_parsed = float(str(value).replace(",", "."))
             if float_parsed >= 0:
                 return float_parsed
         return None

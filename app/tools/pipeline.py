@@ -6,11 +6,19 @@ This module provides full data pipeline.
 import argparse
 from typing import Dict, List
 
-from .collectors import StationDataCollector, collect_years_list
+from loguru import logger
+
+from .collectors import (  # noqa
+    StationDataCollector,
+    WeatherDataCollector,
+    collect_years_list,
+)
 from .general import clear_folder, download_file, extract_zip
-from .validators import StationData
+from .logger_config import configure_logger, logger_decorator
+from .validators import StationData, WeatherData
 
 
+@logger_decorator
 def run_pipeline(
     years_to_process: List[int],
     inmet_url: str,
@@ -18,8 +26,11 @@ def run_pipeline(
     stage_path: str,
     output_path: str,
     stations_file: str,
+    weather_file: str,
     stations_column_names: Dict[str, str],
-    schema,
+    weather_column_names: Dict[str, str],
+    stations_schema,
+    weather_schema,
 ) -> None:
     """
     Execute the data collection pipeline for specified years.
@@ -61,36 +72,44 @@ def run_pipeline(
         applied.
     """
     years = collect_years_list(years_to_process)
-
-    print(f"Start processing the years {years}...")
+    logger.info(f"Start extraction data from years {years}")
 
     for year in years:
         file_name = str(year) + ".zip"
 
-        print(f"Beginning download data from {year}...")
+        logger.info(f"Beginning download data from {year}")
         download_file(inmet_url, file_name, save_path)
-        print(f"Beginning unzip data from {year}...")
+
+        logger.info(f"Beginning unzip data from {year}")
         extract_zip(save_path, file_name, stage_path)
-        print(f"Finishing process {year}.\n")
 
-    print(f"Start processing all data {years}...")
+        logger.info(f"Finishing process {year}")
 
+    logger.info("Starting processing stations data")
     stations_data = StationDataCollector(
         stage_path,
         output_path,
         stations_file,
         stations_column_names,
-        schema,
+        stations_schema,
     )
-
     stations_data.start()
 
-    print("Start cleaning temp folders...")
+    logger.info("Starting processing weather data")
+    weather_data = WeatherDataCollector(
+        stage_path,
+        output_path,
+        weather_file,
+        weather_column_names,
+        weather_schema,
+    )
+    weather_data.start()
 
+    logger.info("Cleaning temp folders")
     clear_folder(save_path)
     clear_folder(stage_path)
 
-    print("Finish the pipeline.")
+    logger.info("Finish the pipeline!")
 
 
 # Pipeline Parameters
@@ -99,6 +118,7 @@ SAVE_PATH = "data/input"
 STAGE_PATH = "data/stage"
 OUTPUT_PATH = "data/output"
 STATIONS_FILE = "stations"
+WEATHER_FILE = "weather"
 STATION_COLUMN_NAMES = {
     "REGIAO:": "Region",
     "UF:": "State",
@@ -109,8 +129,31 @@ STATION_COLUMN_NAMES = {
     "ALTITUDE:": "Altitude",
     "DATA DE FUNDACAO:": "FoundingDate",
 }
+WEATHER_COLUMN_NAMES = {
+    "Data": "Date",
+    "Hora UTC": "Time",
+    "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)": "TotalPrecipitation",
+    "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)": "AtmosphericPressure",  # noqa
+    "PRESSÃO ATMOSFERICA MAX.NA HORA ANT. (AUT) (mB)": "MaxAtmosphericPressure",  # noqa
+    "PRESSÃO ATMOSFERICA MIN. NA HORA ANT. (AUT) (mB)": "MinAtmosphericPressure",  # noqa
+    "RADIACAO GLOBAL (Kj/m²)": "GlobalRadiation",
+    "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)": "DryBulbTemperature",
+    "TEMPERATURA DO PONTO DE ORVALHO (°C)": "DewPointTemperature",
+    "TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C)": "MaxTemperature",
+    "TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C)": "MinTemperature",
+    "TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C)": "MaxDewPointTemperature",  # noqa
+    "TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C)": "MinDewPointTemperature",  # noqa
+    "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)": "MaxRelativeHumidity",
+    "UMIDADE REL. MIN. NA HORA ANT. (AUT) (%)": "MinRelativeHumidity",
+    "UMIDADE RELATIVA DO AR, HORARIA (%)": "RelativeHumidity",
+    "VENTO, DIREÇÃO HORARIA (gr) (° (gr))": "WindDirection",
+    "VENTO, RAJADA MAXIMA (m/s)": "MaxWindGust",
+    "VENTO, VELOCIDADE HORARIA (m/s)": "WindSpeed",
+}
 
 if __name__ == "__main__":
+    configure_logger()
+
     parser = argparse.ArgumentParser(
         description="Run the data collection pipeline for specified years.",
     )
@@ -129,6 +172,9 @@ if __name__ == "__main__":
         STAGE_PATH,
         OUTPUT_PATH,
         STATIONS_FILE,
+        WEATHER_FILE,
         STATION_COLUMN_NAMES,
+        WEATHER_COLUMN_NAMES,
         StationData,
+        WeatherData,
     )
