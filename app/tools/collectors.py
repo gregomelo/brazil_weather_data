@@ -195,7 +195,6 @@ class StationDataCollector:
 
         """
         try:
-            print(validate_data)
             validate_data.to_parquet(
                 os.path.join(
                     load_path,
@@ -358,8 +357,6 @@ class WeatherDataCollector:
         raw_data = pd.concat(all_data)
         raw_data = raw_data.rename(columns=column_names)
         raw_rows, _ = raw_data.shape
-
-        print(raw_data.columns)
 
         logger.info(f"Total rows to process = {raw_rows:,}")
 
