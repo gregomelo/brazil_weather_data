@@ -239,7 +239,7 @@ class WeatherDataCollector:
 
     def start(self):
         """Start the data collection process."""
-        response = self.get_data()
+        response, data_files = self.get_data()
 
         self.validate_data(response)
 
@@ -247,20 +247,23 @@ class WeatherDataCollector:
             response,
             self._column_names,
             self._output_path,
-            self._file_name,
+            data_files,
         )
 
         self.load_data(response, self._output_path, self._file_name)
 
     @logger_decorator
-    def get_data(self) -> List[pd.DataFrame]:
+    def get_data(self) -> tuple[List[pd.DataFrame], List[str]]:
         """
         Retrieve data from CSV files and returns it as a list of DataFrames.
 
         Returns
         -------
-        List[pd.DataFrame]
+        all_data : List[pd.DataFrame]
             List of partially processed pandas DataFrames.
+
+        data_files : List[str]
+            List of files in process.
 
         Raises
         ------
@@ -269,9 +272,9 @@ class WeatherDataCollector:
             directory.
         """
         # Collecting all CSV file paths from the input folder
-        files = glob.glob(os.path.join(self._input_folder, "*.csv"))
-        files.extend(glob.glob(os.path.join(self._input_folder, "*.CSV")))
-        if not files:
+        data_files = glob.glob(os.path.join(self._input_folder, "*.csv"))
+        data_files.extend(glob.glob(os.path.join(self._input_folder, "*.CSV")))
+        if not data_files:
             raise ValueError("No CSV files found in the specified folder.")
 
         all_data = [
@@ -284,7 +287,7 @@ class WeatherDataCollector:
                 na_values=["-9999"],
                 dtype=str,
             )
-            for file in files
+            for file in data_files
         ]
 
         stations_data = [
@@ -297,7 +300,7 @@ class WeatherDataCollector:
                 decimal=",",
                 index_col=0,
             ).T
-            for file in files
+            for file in data_files
         ]
 
         for i, df in enumerate(all_data):
@@ -306,7 +309,7 @@ class WeatherDataCollector:
                 "CODIGO (WMO):",
             ]
 
-        return all_data
+        return all_data, data_files
 
     @logger_decorator
     def validate_data(self, all_data: List[pd.DataFrame]) -> None:
@@ -314,7 +317,7 @@ class WeatherDataCollector:
 
         Parameters
         ----------
-        data_frames : List[pd.DataFrame]
+        all_data : List[pd.DataFrame]
             List of DataFrames to be validated.
 
         Raises
@@ -331,7 +334,7 @@ class WeatherDataCollector:
         all_data: List[pd.DataFrame],
         column_names: Dict[str, str],
         output_path: str,
-        file_name: str,
+        data_files: List[str],
     ) -> pd.DataFrame:
         """Transform and validates the collected data.
 
@@ -353,26 +356,34 @@ class WeatherDataCollector:
         Exception
             If all collected data is invalid.
         """
-        logger.info("Concatenating the data")
-        raw_data = pd.concat(all_data)
-        raw_data = raw_data.rename(columns=column_names)
-        raw_rows, _ = raw_data.shape
+        files_processing = len(all_data)
+        logger.info(f"Total files to process = {files_processing:,}")
 
-        logger.info(f"Total rows to process = {raw_rows:,}")
-
-        validate_data = pd.DataFrame(
-            list(
+        logger.info("Analyzing data quality")
+        process_data = []
+        for i, df in enumerate(all_data):
+            logger.info(f"Files processed: {i+1}")
+            df = df.rename(columns=column_names)
+            good_data = list(
                 validate_data_quality(
-                    raw_data,
+                    df,
                     output_path,
-                    file_name,
+                    self._file_name,
                     self._schema,
                 ),
-            ),
-        )
+            )
+            if len(good_data) > 0:
+                good_df = pd.DataFrame(good_data)
+
+            if len(good_df) > 0:
+                process_data.append(
+                    good_df,
+                )
 
         logger.info("Data validation finished")
-        if len(validate_data) > 0:
+
+        if len(process_data) > 0:
+            validate_data = pd.concat(process_data)
             return validate_data
         else:
             raise Exception("All collected data was invalid.")
