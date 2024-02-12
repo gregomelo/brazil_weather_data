@@ -1,13 +1,16 @@
+# flake8: noqa:E501
 """Main API module."""
 
 import json
 import os
+from datetime import timedelta
 
 import duckdb
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
+from pydantic import PastDate
 
-from app.tools.pipeline import OUTPUT_PATH, STATIONS_FILE
+from app.tools.pipeline import OUTPUT_PATH, STATIONS_FILE, WEATHER_FILE
 from app.tools.validators import IdStationWhoType
 
 API_DESCRIPTION = """
@@ -28,7 +31,7 @@ tags_metadata = [
     },
     {
         "name": "weather",
-        "description": "*Future.* Detailed meteorological data.",
+        "description": "Detailed meteorological data.",
     },
     {
         "name": "query",
@@ -128,16 +131,89 @@ def list_stations():
     return query_db(query_sql)
 
 
-@app.get("/stations/{IdStationWho}/", tags=["stations"])
+@app.get("/stations/{id_station_who}/", tags=["stations"])
 def list_station(
-    IdStationWho: IdStationWhoType,
+    id_station_who: IdStationWhoType,
 ):
     """Return information about a selected station using IdStationWho."""
     query_sql = f"""SELECT *
                     FROM '{stations_db}'
-                    WHERE IdStationWho = '{IdStationWho}'"""  # nosec B608
+                    WHERE IdStationWho = '{id_station_who}'"""  # nosec B608
     result = query_db(query_sql)
     if result:
         return result
     else:
         raise HTTPException(status_code=404, detail="Station do not exist.")
+
+
+weather_parquet = f"{WEATHER_FILE}.parquet"
+weather_db = os.path.join(OUTPUT_PATH, weather_parquet)
+
+
+@app.get("/weather/{id_station_who}/{start_date}/{end_date}/", tags=["weather"])  # noqa
+def get_weather_data(
+    id_station_who: IdStationWhoType,
+    start_date: PastDate,
+    end_date: PastDate,
+):
+    """Return information about weather.
+
+    Return information about weather collected by a station between a start
+    and end date. The interval between start and end date should be less
+    than five weeks.
+
+    | Column                       | Portuguese Description                                   | English Description               | Measure Unit      |
+    |------------------------------|----------------------------------------------------------|-----------------------------------|-------------------|
+    | Date                         | Data                                                     | Date                              | -                 |
+    | UTCTime                      | Hora UTC                                                 | UTCTime                           | -                 |
+    | TotalPrecipitation           | Precipitação total no horário                            | Total Precipitation at Time       | mm                |
+    | AtmosphericPressure          | Pressão atmosférica ao nível da estação, horária         | Hourly Atmospheric Pressure       | mB                |
+    | MaxAtmosphericPressure       | Pressão atmosférica máxima na hora anterior (automática) | Max Atmospheric Pressure (Auto)   | mB                |
+    | MinAtmosphericPressure       | Pressão atmosférica mínima na hora anterior (automática) | Min Atmospheric Pressure (Auto)   | mB                |
+    | GlobalRadiation              | Radiação global                                          | Global Radiation                  | Kj/m²             |
+    | DryBulbTemperature           | Temperatura do ar - bulbo seco, horária                  | Dry Bulb Air Temperature          | °C                |
+    | DewPointTemperature          | Temperatura do ponto de orvalho                          | Dew Point Temperature             | °C                |
+    | MaxTemperaturePreviousHour   | Temperatura máxima na hora anterior (automática)         | Max Temperature Previous Hour     | °C                |
+    | MinTemperaturePreviousHour   | Temperatura mínima na hora anterior (automática)         | Min Temperature Previous Hour     | °C                |
+    | MaxDewPointTemperature       | Temperatura de orvalho máxima na hora anterior (auto)    | Max Dew Point Temperature (Auto)  | °C                |
+    | MinDewPointTemperature       | Temperatura de orvalho mínima na hora anterior (auto)    | Min Dew Point Temperature (Auto)  | °C                |
+    | MaxRelativeHumidity          | Umidade relativa máxima na hora anterior (automática)    | Max Relative Humidity (Auto)      | %                 |
+    | MinRelativeHumidity          | Umidade relativa mínima na hora anterior (automática)    | Min Relative Humidity (Auto)      | %                 |
+    | HourlyRelativeHumidity       | Umidade relativa do ar, horária                          | Hourly Relative Humidity          | %                 |
+    | WindDirectionDegrees         | Vento, direção horária                                   | Hourly Wind Direction             | ° (gr)            |
+    | MaxWindGust                  | Vento, rajada máxima                                     | Max Wind Gust                     | m/s               |
+    | WindSpeed                    | Vento, velocidade horária                                | Hourly Wind Speed                 | m/s               |
+
+
+    """
+    if start_date > end_date:
+        raise HTTPException(
+            status_code=422,
+            detail="end_date should be after start_date.",
+        )
+
+    if end_date > start_date + timedelta(weeks=5):
+        raise HTTPException(
+            status_code=422,
+            detail="Maximum period between start_date and end_date should be 5 weeks.",  # noqa
+        )
+
+    query_sql = f"""
+                SELECT
+                    *
+                FROM
+                    '{weather_db}'
+                WHERE
+                    IdStationWho = '{id_station_who}' AND
+                    Date >= '{start_date}' AND
+                    Date <= '{end_date}'
+                """  # nosec B608
+    result = query_db(query_sql)
+
+    if result:
+        return result
+    else:
+        raise HTTPException(
+            status_code=422,
+            detail="There is no data to show. Rewrite your query.",
+        )
