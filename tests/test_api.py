@@ -1,9 +1,16 @@
+import os
+
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.tools.pipeline import STATION_COLUMN_NAMES
+from app.tools.pipeline import (
+    OUTPUT_PATH,
+    STATION_COLUMN_NAMES,
+    WEATHER_COLUMN_NAMES,
+    WEATHER_FILE,
+)
 
 
 @pytest.fixture
@@ -138,3 +145,85 @@ class TestStationsRoute:
 
         assert response.status_code == 404
         assert response_json == {"detail": "Station do not exist."}
+
+
+WEATHER_DF_COLUMN_NAMES = [column for column in WEATHER_COLUMN_NAMES.values()]
+
+
+class TestWeatherRoute:
+    """Run tests on weather routes.
+
+    Notes
+    -------
+    These tests could be done using test parameters to avoid repetition.
+    """
+
+    def test_weather_parquet_integrity(self):
+        weather_parquet = f"{WEATHER_FILE}.parquet"
+        weather_db = os.path.join(OUTPUT_PATH, weather_parquet)
+        with open(weather_db, "rb") as f:
+            f.seek(-4, 2)
+            magic_bytes = f.read()
+            print(magic_bytes)
+            assert magic_bytes == b"PAR1"
+
+    def test_get_correct_data(
+        self,
+        test_client,
+    ):
+        response = test_client.get("/weather/A544/2023-01-01/2023-01-02/")
+
+        response_json = response.json()
+
+        response_df = pd.DataFrame(response_json)
+
+        response_df_columns = response_df.columns.to_list()
+
+        assert response.status_code == 200
+        assert isinstance(response_json, list)
+        assert response_df_columns.sort() == WEATHER_DF_COLUMN_NAMES.sort()
+
+    def test_get_more_than_5_weeks(
+        self,
+        test_client,
+    ):
+        response = test_client.get("/weather/A544/2023-01-01/2023-05-02/")
+        response_json = response.json()
+
+        assert response.status_code == 422
+        assert response_json == {
+            "detail": "Maximum period between start_date and end_date should be 5 weeks.",  # noqa
+        }  # noqa
+
+    def test_get_end_before_start(
+        self,
+        test_client,
+    ):
+        response = test_client.get("/weather/A544/2023-02-01/2023-01-02/")
+        response_json = response.json()
+
+        assert response.status_code == 422
+        assert response_json == {
+            "detail": "end_date should be after start_date.",
+        }  # noqa
+
+    def test_get_future_data(
+        self,
+        test_client,
+    ):
+        response = test_client.get("/weather/A544/2099-01-01/2099-01-02/")
+
+        assert response.status_code == 422
+
+    def test_empty_query(
+        self,
+        test_client,
+    ):
+        response = test_client.get("/weather/A000/1999-01-01/1999-01-02/")
+
+        response_json = response.json()
+
+        assert response.status_code == 422
+        assert response_json == {
+            "detail": "There is no data to show. Rewrite your query.",
+        }

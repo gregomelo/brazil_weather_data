@@ -10,9 +10,11 @@ from app.tools.pipeline import run_pipeline
 @patch("app.tools.pipeline.download_file")
 @patch("app.tools.pipeline.extract_zip")
 @patch("app.tools.pipeline.StationDataCollector")
+@patch("app.tools.pipeline.WeatherDataCollector")
 @patch("app.tools.pipeline.clear_folder")
 def test_run_pipeline(
     mock_clear_folder,
+    mock_WeatherDataCollector,
     mock_StationDataCollector,
     mock_extract_zip,
     mock_download_file,
@@ -52,8 +54,11 @@ def test_run_pipeline(
     stage_path = "path/to/stage"
     output_path = "path/to/output"
     stations_file = "stations_file"
+    weather_file = "weather_file"
     stations_column_names = {"CODIGO (WMO):": "IdStationWho"}
-    schema = None
+    weather_column_names = {"CODIGO (WMO):": "IdStationWho"}
+    stations_schema = None
+    weather_schema = None
 
     run_pipeline(
         years_to_process,
@@ -62,8 +67,11 @@ def test_run_pipeline(
         stage_path,
         output_path,
         stations_file,
+        weather_file,
         stations_column_names,
-        schema,
+        weather_column_names,
+        stations_schema,
+        weather_schema,
     )
 
     mock_collect_years_list.assert_called_once_with(years_to_process)
@@ -74,7 +82,14 @@ def test_run_pipeline(
         output_path,
         stations_file,
         stations_column_names,
-        schema,
+        stations_schema,
+    )
+    mock_WeatherDataCollector.assert_called_once_with(
+        stage_path,
+        output_path,
+        weather_file,
+        weather_column_names,
+        weather_schema,
     )
     mock_clear_folder.assert_called()
 
@@ -122,7 +137,9 @@ def test_task_pipeline(mock_run_pipeline):
             pipeline_module.STAGE_PATH,
             pipeline_module.OUTPUT_PATH,
             pipeline_module.STATIONS_FILE,
+            pipeline_module.WEATHER_FILE,
             pipeline_module.STATION_COLUMN_NAMES,
+            pipeline_module.WEATHER_COLUMN_NAMES,
             pipeline_module.StationData,
         )
 
@@ -133,6 +150,8 @@ def test_task_pipeline(mock_run_pipeline):
         pipeline_module.STAGE_PATH,
         pipeline_module.OUTPUT_PATH,
         pipeline_module.STATIONS_FILE,
+        pipeline_module.WEATHER_FILE,
         pipeline_module.STATION_COLUMN_NAMES,
+        pipeline_module.WEATHER_COLUMN_NAMES,
         pipeline_module.StationData,
     )
