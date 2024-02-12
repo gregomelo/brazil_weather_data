@@ -261,6 +261,7 @@ class StationDataCollector:
                     load_path,
                     file_name + ".parquet",
                 ),
+                index=False,
             )
         except Exception as e:
             print(f"Error to convert data to parquet: {e}")
@@ -524,6 +525,7 @@ class WeatherDataCollector:
                     load_path,
                     file_name + ".parquet",
                 ),
+                index=False,
             )
         except Exception as e:
             print(f"Error to convert data to parquet: {e}")
