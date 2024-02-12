@@ -139,7 +139,7 @@ class StationDataCollector:
                 decimal=",",
                 index_col=0,
             ).T
-            for file in data_files
+            for file in data_files[:100]
         ]
 
         return all_data, data_files
@@ -385,7 +385,7 @@ class WeatherDataCollector:
                 na_values=["-9999"],
                 dtype=str,
             )
-            for file in data_files
+            for file in data_files[:100]
         ]
 
         stations_data = [
@@ -398,7 +398,7 @@ class WeatherDataCollector:
                 decimal=",",
                 index_col=0,
             ).T
-            for file in data_files
+            for file in data_files[:100]
         ]
 
         for i, df in enumerate(all_data):
