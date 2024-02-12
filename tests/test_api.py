@@ -1,9 +1,16 @@
+import os
+
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.tools.pipeline import STATION_COLUMN_NAMES, WEATHER_COLUMN_NAMES
+from app.tools.pipeline import (
+    OUTPUT_PATH,
+    STATION_COLUMN_NAMES,
+    WEATHER_COLUMN_NAMES,
+    WEATHER_FILE,
+)
 
 
 @pytest.fixture
@@ -150,6 +157,15 @@ class TestWeatherRoute:
     -------
     These tests could be done using test parameters to avoid repetition.
     """
+
+    def test_weather_parquet_integrity(self):
+        weather_parquet = f"{WEATHER_FILE}.parquet"
+        weather_db = os.path.join(OUTPUT_PATH, weather_parquet)
+        with open(weather_db, "rb") as f:
+            f.seek(-4, 2)
+            magic_bytes = f.read()
+            print(magic_bytes)
+            assert magic_bytes == b"PAR1"
 
     def test_get_correct_data(
         self,
