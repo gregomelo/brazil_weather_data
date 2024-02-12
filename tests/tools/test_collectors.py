@@ -1,4 +1,5 @@
 # flake8: noqa:E501
+import glob
 import os
 import pathlib
 from typing import List
@@ -455,9 +456,6 @@ class TestStationDataCollector:
             StationData,
         )
 
-        log_file = STATIONS_FILE + "_invalid_records.log"
-        log_file_path = output_invalid / log_file
-
         output_file = STATIONS_FILE + ".parquet"
         output_invalid_file_path = output_invalid / output_file
 
@@ -466,7 +464,10 @@ class TestStationDataCollector:
         assert "All collected data was invalid." in str(
             excinfo.value,
         )
-        assert os.path.exists(log_file_path)
+
+        log_files = glob.glob(os.path.join(output_invalid, "*.log"))
+
+        assert len(log_files) == 3
         assert not os.path.exists(output_invalid_file_path)
 
     def test_collecting_mixed_data(
@@ -499,12 +500,11 @@ class TestStationDataCollector:
         output_file = STATIONS_FILE + ".parquet"
         output_mixed_file_path = output_mixed / output_file
 
-        log_file = STATIONS_FILE + "_invalid_records.log"
-        log_file_path = output_mixed / log_file
-
         stations_data.start()
 
-        assert os.path.exists(log_file_path)
+        log_files = glob.glob(os.path.join(output_mixed, "*.log"))
+
+        assert len(log_files) == 1
 
         assert os.path.exists(output_mixed_file_path)
 
@@ -616,18 +616,18 @@ class TestWeatherDataCollector:
             WeatherData,
         )
 
-        log_file = WEATHER_FILE + "_invalid_records.log"
-        log_file_path = output_invalid / log_file
-
         output_file = WEATHER_FILE + ".parquet"
         output_invalid_file_path = output_invalid / output_file
 
         with pytest.raises(Exception) as excinfo:
             weather_data.start()
+
+        log_files = glob.glob(os.path.join(output_invalid, "*.log"))
+
         assert "All collected data was invalid." in str(
             excinfo.value,
         )
-        assert os.path.exists(log_file_path)
+        assert len(log_files) == 3
         assert not os.path.exists(output_invalid_file_path)
 
     def test_collecting_mixed_data(
@@ -660,12 +660,11 @@ class TestWeatherDataCollector:
         output_file = WEATHER_FILE + ".parquet"
         output_mixed_file_path = output_mixed / output_file
 
-        log_file = WEATHER_FILE + "_invalid_records.log"
-        log_file_path = output_mixed / log_file
-
         weather_data.start()
 
-        assert os.path.exists(log_file_path)
+        log_files = glob.glob(os.path.join(output_mixed, "*.log"))
+
+        assert len(log_files) == 2
 
         assert os.path.exists(output_mixed_file_path)
 

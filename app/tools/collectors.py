@@ -8,7 +8,7 @@ This module provides utility functions for data collection.
 import glob
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import pandas as pd
 from loguru import logger
@@ -22,7 +22,39 @@ except ImportError:
 
 
 class StationDataCollector:
-    """Data collector about weather stations in Brazil."""
+    """Data collector for weather stations in Brazil.
+
+    This class is designed to collect, validate, transform, and save data from
+    CSV files related to weather stations across Brazil. It utilizes a
+    Pydantic model for data validation to ensure the integrity and accuracy
+    of the data collected.
+
+    Parameters:
+    ----------
+    input_folder : str
+        Directory containing the source CSV files.
+    output_path : str
+        Directory where processed files will be saved.
+    file_name : str
+        Base name for the output file.
+    column_names : Dict[str, str]
+        Mapping from original column names to desired column names.
+    schema : BaseModel
+        Pydantic model used for validating the data.
+
+    Attributes:
+    ----------
+    _input_folder : str
+        Input directory for source CSV files.
+    _output_path : str
+        Output directory for processed data.
+    _file_name : str
+        Base name for the output file.
+    _schema : BaseModel
+        Pydantic model for data validation.
+    _column_names : Dict[str, str]
+        Column name mapping.
+    """
 
     def __init__(
         self,
@@ -34,18 +66,18 @@ class StationDataCollector:
     ):
         """Initialize a new StationDataCollector instance.
 
-        Parameters
+        Parameters:
         ----------
         input_folder : str
-            Path to the folder containing the data files.
+            Directory containing the source CSV files.
         output_path : str
-            Path to the folder where processed files will be stored.
+            Directory where processed files will be saved.
         file_name : str
-            Name of the output file.
+            Base name for the output file.
         column_names : Dict[str, str]
-            Mapping of original column names to new names.
-        schema : Pydantic model
-            Pydantic model for data validation.
+            Mapping from original column names to desired column names.
+        schema : BaseModel
+            Pydantic model used for validating the data.
         """
         self._input_folder = input_folder
         self._output_path = output_path
@@ -54,8 +86,12 @@ class StationDataCollector:
         self._column_names = column_names
 
     def start(self):
-        """Start the data collection process."""
-        response = self.get_data()
+        """Initiate the data collection process.
+
+        This method orchestrates the workflow of data collection including
+        retrieving, validating, transforming, and storing data.
+        """
+        response, data_files = self.get_data()
 
         self.validate_data(response)
 
@@ -63,31 +99,34 @@ class StationDataCollector:
             response,
             self._column_names,
             self._output_path,
+            data_files,
+        )
+
+        self.load_data(
+            response,
+            self._output_path,
             self._file_name,
         )
 
-        self.load_data(response, self._output_path, self._file_name)
-
     @logger_decorator
-    def get_data(self) -> List[pd.DataFrame]:
-        """
-        Retrieve data from CSV files and returns it as a list of DataFrames.
+    def get_data(self) -> Tuple[List[pd.DataFrame], List[str]]:
+        """Get data from CSV files.
 
-        Returns
+        Returns:
         -------
-        List[pd.DataFrame]
-            List of partially processed pandas DataFrames.
+        tuple[List[pd.DataFrame], List[str]]
+            A tuple containing a list of DataFrames representing the data and
+            a list of strings representing the file names.
 
-        Raises
+        Raises:
         ------
         ValueError
-            If no CSV files are found in the specified
-            directory.
+            If no CSV files are found in the specified directory.
         """
         # Collecting all CSV file paths from the input folder
-        files = glob.glob(os.path.join(self._input_folder, "*.csv"))
-        files.extend(glob.glob(os.path.join(self._input_folder, "*.CSV")))
-        if not files:
+        data_files = glob.glob(os.path.join(self._input_folder, "*.csv"))
+        data_files.extend(glob.glob(os.path.join(self._input_folder, "*.CSV")))
+        if not data_files:
             raise ValueError("No CSV files found in the specified folder.")
 
         all_data = [
@@ -100,21 +139,21 @@ class StationDataCollector:
                 decimal=",",
                 index_col=0,
             ).T
-            for file in files
+            for file in data_files
         ]
 
-        return all_data
+        return all_data, data_files
 
     @logger_decorator
     def validate_data(self, all_data: List[pd.DataFrame]) -> None:
         """Validate the structure of the collected data.
 
-        Parameters
+        Parameters:
         ----------
-        data_frames : List[pd.DataFrame]
+        all_data : List[pd.DataFrame]
             List of DataFrames to be validated.
 
-        Raises
+        Raises:
         ------
         ValueError
             If the structure of any DataFrame is inconsistent.
@@ -128,47 +167,67 @@ class StationDataCollector:
         all_data: List[pd.DataFrame],
         column_names: Dict[str, str],
         output_path: str,
-        file_name: str,
+        data_files: List[str],
     ) -> pd.DataFrame:
-        """Transform and validates the collected data.
+        """Transform and validate the collected data.
 
-        Concatenates all DataFrames, renames columns, validates data quality,
-        remove duplicates, and logs any invalid records.
-
-        Parameters
+        Parameters:
         ----------
-        data_frames : List[pd.DataFrame]
+        all_data : List[pd.DataFrame]
             List of DataFrames to be transformed.
+        column_names : Dict[str, str]
+            Mapping of original column names to new names.
+        output_path : str
+            Path to the folder where the processed data will be saved.
+        data_files : List[str]
+            List of file names being processed.
 
-        Returns
+        Returns:
         -------
         pd.DataFrame
             Concatenated and validated DataFrame.
 
-        Raises
+        Raises:
         ------
         Exception
             If all collected data is invalid.
         """
-        logger.info("Concatenating the data")
-        raw_data = pd.concat(all_data)
-        raw_data = raw_data.rename(columns=column_names)
-        raw_rows, _ = raw_data.shape
-        logger.info(f"Total rows to process = {raw_rows:,}")
+        files_processing = len(all_data)
+        logger.info(f"Total files to process = {files_processing:,}")
 
-        validate_data = pd.DataFrame(
-            list(
+        logger.info("Analyzing data quality")
+        process_data = []
+        good_df = pd.DataFrame()
+        for i, df in enumerate(all_data):
+            logger.info(f"Files to process: {files_processing-i:,}")
+
+            file_name_process = data_files[i].split("/")[-1]
+            file_log = file_name_process.replace(".", "_")
+
+            df = df.rename(columns=column_names)
+            good_data = list(
                 validate_data_quality(
-                    raw_data,
+                    df,
                     output_path,
-                    file_name,
+                    file_log,
                     self._schema,
                 ),
-            ),
-        )
+            )
+            if good_data:
+                good_df = pd.DataFrame(good_data)
+                process_data.append(good_df)
+            else:
+                good_df = pd.DataFrame()
 
         logger.info("Data validation finished")
-        if len(validate_data) > 0:
+
+        # Avoiding concatenating empty dataframes and warnings from Pandas
+        process_data_filtered = [
+            df for df in process_data if not df.empty and not df.isna().all().all()
+        ]
+        if process_data_filtered:
+            validate_data = pd.concat(process_data_filtered)
+            validate_data = validate_data.drop_duplicates(["IdStationWho"])
             return validate_data
         else:
             raise Exception("All collected data was invalid.")
@@ -182,17 +241,19 @@ class StationDataCollector:
     ) -> None:
         """Save the validated data to a Parquet file.
 
-        Parameters
+        Parameters:
         ----------
-        validated_data : pd.DataFrame
+        validate_data : pd.DataFrame
             DataFrame containing validated station data.
+        load_path : str
+            Path to the folder where the Parquet file will be saved.
+        file_name : str
+            Name of the output file without the extension.
 
-
-        Raises
+        Raises:
         ------
         Exception
-        If there is an error converting data to Parquet.
-
+            If there is an error converting data to Parquet.
         """
         try:
             validate_data.to_parquet(
@@ -206,7 +267,39 @@ class StationDataCollector:
 
 
 class WeatherDataCollector:
-    """Data collector about weather collect by stations in Brazil."""
+    """Data collector for weather in Brazil.
+
+    This class is designed to collect, validate, transform, and save data from
+    CSV files related to weather stations across Brazil. It utilizes a
+    Pydantic model for data validation to ensure the integrity and accuracy
+    of the data collected.
+
+    Parameters:
+    ----------
+    input_folder : str
+        Directory containing the source CSV files.
+    output_path : str
+        Directory where processed files will be saved.
+    file_name : str
+        Base name for the output file.
+    column_names : Dict[str, str]
+        Mapping from original column names to desired column names.
+    schema : BaseModel
+        Pydantic model used for validating the data.
+
+    Attributes:
+    ----------
+    _input_folder : str
+        Input directory for source CSV files.
+    _output_path : str
+        Output directory for processed data.
+    _file_name : str
+        Base name for the output file.
+    _schema : BaseModel
+        Pydantic model for data validation.
+    _column_names : Dict[str, str]
+        Column name mapping.
+    """
 
     def __init__(
         self,
@@ -218,18 +311,18 @@ class WeatherDataCollector:
     ):
         """Initialize a new StationDataCollector instance.
 
-        Parameters
+        Parameters:
         ----------
         input_folder : str
-            Path to the folder containing the data files.
+            Directory containing the source CSV files.
         output_path : str
-            Path to the folder where processed files will be stored.
+            Directory where processed files will be saved.
         file_name : str
-            Name of the output file.
+            Base name for the output file.
         column_names : Dict[str, str]
-            Mapping of original column names to new names.
-        schema : Pydantic model
-            Pydantic model for data validation.
+            Mapping from original column names to desired column names.
+        schema : BaseModel
+            Pydantic model used for validating the data.
         """
         self._input_folder = input_folder
         self._output_path = output_path
@@ -238,7 +331,11 @@ class WeatherDataCollector:
         self._column_names = column_names
 
     def start(self):
-        """Start the data collection process."""
+        """Initiate the data collection process.
+
+        This method orchestrates the workflow of data collection including
+        retrieving, validating, transforming, and storing data.
+        """
         response, data_files = self.get_data()
 
         self.validate_data(response)
@@ -250,26 +347,26 @@ class WeatherDataCollector:
             data_files,
         )
 
-        self.load_data(response, self._output_path, self._file_name)
+        self.load_data(
+            response,
+            self._output_path,
+            self._file_name,
+        )
 
     @logger_decorator
     def get_data(self) -> tuple[List[pd.DataFrame], List[str]]:
-        """
-        Retrieve data from CSV files and returns it as a list of DataFrames.
+        """Get data from CSV files.
 
-        Returns
+        Returns:
         -------
-        all_data : List[pd.DataFrame]
-            List of partially processed pandas DataFrames.
+        tuple[List[pd.DataFrame], List[str]]
+            A tuple containing a list of DataFrames representing the data and
+            a list of strings representing the file names.
 
-        data_files : List[str]
-            List of files in process.
-
-        Raises
+        Raises:
         ------
         ValueError
-            If no CSV files are found in the specified
-            directory.
+            If no CSV files are found in the specified directory.
         """
         # Collecting all CSV file paths from the input folder
         data_files = glob.glob(os.path.join(self._input_folder, "*.csv"))
@@ -315,12 +412,12 @@ class WeatherDataCollector:
     def validate_data(self, all_data: List[pd.DataFrame]) -> None:
         """Validate the structure of the collected data.
 
-        Parameters
+        Parameters:
         ----------
         all_data : List[pd.DataFrame]
             List of DataFrames to be validated.
 
-        Raises
+        Raises:
         ------
         ValueError
             If the structure of any DataFrame is inconsistent.
@@ -336,22 +433,25 @@ class WeatherDataCollector:
         output_path: str,
         data_files: List[str],
     ) -> pd.DataFrame:
-        """Transform and validates the collected data.
+        """Transform and validate the collected data.
 
-        Concatenates all DataFrames, renames columns, validates data quality,
-        remove duplicates, and logs any invalid records.
-
-        Parameters
+        Parameters:
         ----------
-        data_frames : List[pd.DataFrame]
+        all_data : List[pd.DataFrame]
             List of DataFrames to be transformed.
+        column_names : Dict[str, str]
+            Mapping of original column names to new names.
+        output_path : str
+            Path to the folder where the processed data will be saved.
+        data_files : List[str]
+            List of file names being processed.
 
-        Returns
+        Returns:
         -------
         pd.DataFrame
             Concatenated and validated DataFrame.
 
-        Raises
+        Raises:
         ------
         Exception
             If all collected data is invalid.
@@ -361,29 +461,36 @@ class WeatherDataCollector:
 
         logger.info("Analyzing data quality")
         process_data = []
+        good_df = pd.DataFrame()
         for i, df in enumerate(all_data):
-            logger.info(f"Files processed: {i+1}")
+            logger.info(f"Files to process: {files_processing-i:,}")
+
+            file_name_process = data_files[i].split("/")[-1]
+            file_log = file_name_process.replace(".", "_")
+
             df = df.rename(columns=column_names)
             good_data = list(
                 validate_data_quality(
                     df,
                     output_path,
-                    self._file_name,
+                    file_log,
                     self._schema,
                 ),
             )
-            if len(good_data) > 0:
+            if good_data:
                 good_df = pd.DataFrame(good_data)
-
-            if len(good_df) > 0:
-                process_data.append(
-                    good_df,
-                )
+                process_data.append(good_df)
+            else:
+                good_df = pd.DataFrame()
 
         logger.info("Data validation finished")
 
-        if len(process_data) > 0:
-            validate_data = pd.concat(process_data)
+        # Avoiding concatenating empty dataframes and warnings from Pandas
+        process_data_filtered = [
+            df for df in process_data if not df.empty and not df.isna().all().all()
+        ]
+        if process_data_filtered:
+            validate_data = pd.concat(process_data_filtered)
             return validate_data
         else:
             raise Exception("All collected data was invalid.")
@@ -397,17 +504,19 @@ class WeatherDataCollector:
     ) -> None:
         """Save the validated data to a Parquet file.
 
-        Parameters
+        Parameters:
         ----------
-        validated_data : pd.DataFrame
+        validate_data : pd.DataFrame
             DataFrame containing validated station data.
+        load_path : str
+            Path to the folder where the Parquet file will be saved.
+        file_name : str
+            Name of the output file without the extension.
 
-
-        Raises
+        Raises:
         ------
         Exception
-        If there is an error converting data to Parquet.
-
+            If there is an error converting data to Parquet.
         """
         try:
             validate_data.to_parquet(
