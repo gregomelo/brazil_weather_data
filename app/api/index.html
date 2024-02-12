@@ -459,6 +459,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#app.main.get_weather_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_weather_data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#app.main.list_station" class="md-nav__link">
     <span class="md-ellipsis">
       list_station
@@ -752,6 +761,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#app.main.get_weather_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_weather_data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#app.main.list_station" class="md-nav__link">
     <span class="md-ellipsis">
       list_station
@@ -867,8 +885,293 @@
 
 
 
+<h2 id="app.main.get_weather_data" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_weather_data</span><span class="p">(</span><span class="n">id_station_who</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return information about weather.</p>
+<p>Return information about weather collected by a station between a start
+and end date. The interval between start and end date should be less
+than five weeks.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Portuguese Description</th>
+<th>English Description</th>
+<th>Measure Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date</td>
+<td>Data</td>
+<td>Date</td>
+<td>-</td>
+</tr>
+<tr>
+<td>UTCTime</td>
+<td>Hora UTC</td>
+<td>UTCTime</td>
+<td>-</td>
+</tr>
+<tr>
+<td>TotalPrecipitation</td>
+<td>Precipitação total no horário</td>
+<td>Total Precipitation at Time</td>
+<td>mm</td>
+</tr>
+<tr>
+<td>AtmosphericPressure</td>
+<td>Pressão atmosférica ao nível da estação, horária</td>
+<td>Hourly Atmospheric Pressure</td>
+<td>mB</td>
+</tr>
+<tr>
+<td>MaxAtmosphericPressure</td>
+<td>Pressão atmosférica máxima na hora anterior (automática)</td>
+<td>Max Atmospheric Pressure (Auto)</td>
+<td>mB</td>
+</tr>
+<tr>
+<td>MinAtmosphericPressure</td>
+<td>Pressão atmosférica mínima na hora anterior (automática)</td>
+<td>Min Atmospheric Pressure (Auto)</td>
+<td>mB</td>
+</tr>
+<tr>
+<td>GlobalRadiation</td>
+<td>Radiação global</td>
+<td>Global Radiation</td>
+<td>Kj/m²</td>
+</tr>
+<tr>
+<td>DryBulbTemperature</td>
+<td>Temperatura do ar - bulbo seco, horária</td>
+<td>Dry Bulb Air Temperature</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>DewPointTemperature</td>
+<td>Temperatura do ponto de orvalho</td>
+<td>Dew Point Temperature</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>MaxTemperaturePreviousHour</td>
+<td>Temperatura máxima na hora anterior (automática)</td>
+<td>Max Temperature Previous Hour</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>MinTemperaturePreviousHour</td>
+<td>Temperatura mínima na hora anterior (automática)</td>
+<td>Min Temperature Previous Hour</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>MaxDewPointTemperature</td>
+<td>Temperatura de orvalho máxima na hora anterior (auto)</td>
+<td>Max Dew Point Temperature (Auto)</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>MinDewPointTemperature</td>
+<td>Temperatura de orvalho mínima na hora anterior (auto)</td>
+<td>Min Dew Point Temperature (Auto)</td>
+<td>°C</td>
+</tr>
+<tr>
+<td>MaxRelativeHumidity</td>
+<td>Umidade relativa máxima na hora anterior (automática)</td>
+<td>Max Relative Humidity (Auto)</td>
+<td>%</td>
+</tr>
+<tr>
+<td>MinRelativeHumidity</td>
+<td>Umidade relativa mínima na hora anterior (automática)</td>
+<td>Min Relative Humidity (Auto)</td>
+<td>%</td>
+</tr>
+<tr>
+<td>HourlyRelativeHumidity</td>
+<td>Umidade relativa do ar, horária</td>
+<td>Hourly Relative Humidity</td>
+<td>%</td>
+</tr>
+<tr>
+<td>WindDirectionDegrees</td>
+<td>Vento, direção horária</td>
+<td>Hourly Wind Direction</td>
+<td>° (gr)</td>
+</tr>
+<tr>
+<td>MaxWindGust</td>
+<td>Vento, rajada máxima</td>
+<td>Max Wind Gust</td>
+<td>m/s</td>
+</tr>
+<tr>
+<td>WindSpeed</td>
+<td>Vento, velocidade horária</td>
+<td>Hourly Wind Speed</td>
+<td>m/s</td>
+</tr>
+</tbody>
+</table>
+
+          <details class="quote">
+            <summary>Source code in <code>app/main.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/weather/</span><span class="si">{id_station_who}</span><span class="s2">/</span><span class="si">{start_date}</span><span class="s2">/</span><span class="si">{end_date}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;weather&quot;</span><span class="p">])</span>  <span class="c1"># noqa</span>
+<span class="k">def</span> <span class="nf">get_weather_data</span><span class="p">(</span>
+    <span class="n">id_station_who</span><span class="p">:</span> <span class="n">IdStationWhoType</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">PastDate</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">PastDate</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return information about weather.</span>
+
+<span class="sd">    Return information about weather collected by a station between a start</span>
+<span class="sd">    and end date. The interval between start and end date should be less</span>
+<span class="sd">    than five weeks.</span>
+
+<span class="sd">    | Column                       | Portuguese Description                                   | English Description               | Measure Unit      |</span>
+<span class="sd">    |------------------------------|----------------------------------------------------------|-----------------------------------|-------------------|</span>
+<span class="sd">    | Date                         | Data                                                     | Date                              | -                 |</span>
+<span class="sd">    | UTCTime                      | Hora UTC                                                 | UTCTime                           | -                 |</span>
+<span class="sd">    | TotalPrecipitation           | Precipitação total no horário                            | Total Precipitation at Time       | mm                |</span>
+<span class="sd">    | AtmosphericPressure          | Pressão atmosférica ao nível da estação, horária         | Hourly Atmospheric Pressure       | mB                |</span>
+<span class="sd">    | MaxAtmosphericPressure       | Pressão atmosférica máxima na hora anterior (automática) | Max Atmospheric Pressure (Auto)   | mB                |</span>
+<span class="sd">    | MinAtmosphericPressure       | Pressão atmosférica mínima na hora anterior (automática) | Min Atmospheric Pressure (Auto)   | mB                |</span>
+<span class="sd">    | GlobalRadiation              | Radiação global                                          | Global Radiation                  | Kj/m²             |</span>
+<span class="sd">    | DryBulbTemperature           | Temperatura do ar - bulbo seco, horária                  | Dry Bulb Air Temperature          | °C                |</span>
+<span class="sd">    | DewPointTemperature          | Temperatura do ponto de orvalho                          | Dew Point Temperature             | °C                |</span>
+<span class="sd">    | MaxTemperaturePreviousHour   | Temperatura máxima na hora anterior (automática)         | Max Temperature Previous Hour     | °C                |</span>
+<span class="sd">    | MinTemperaturePreviousHour   | Temperatura mínima na hora anterior (automática)         | Min Temperature Previous Hour     | °C                |</span>
+<span class="sd">    | MaxDewPointTemperature       | Temperatura de orvalho máxima na hora anterior (auto)    | Max Dew Point Temperature (Auto)  | °C                |</span>
+<span class="sd">    | MinDewPointTemperature       | Temperatura de orvalho mínima na hora anterior (auto)    | Min Dew Point Temperature (Auto)  | °C                |</span>
+<span class="sd">    | MaxRelativeHumidity          | Umidade relativa máxima na hora anterior (automática)    | Max Relative Humidity (Auto)      | %                 |</span>
+<span class="sd">    | MinRelativeHumidity          | Umidade relativa mínima na hora anterior (automática)    | Min Relative Humidity (Auto)      | %                 |</span>
+<span class="sd">    | HourlyRelativeHumidity       | Umidade relativa do ar, horária                          | Hourly Relative Humidity          | %                 |</span>
+<span class="sd">    | WindDirectionDegrees         | Vento, direção horária                                   | Hourly Wind Direction             | ° (gr)            |</span>
+<span class="sd">    | MaxWindGust                  | Vento, rajada máxima                                     | Max Wind Gust                     | m/s               |</span>
+<span class="sd">    | WindSpeed                    | Vento, velocidade horária                                | Hourly Wind Speed                 | m/s               |</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">start_date</span> <span class="o">&gt;</span> <span class="n">end_date</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;end_date should be after start_date.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">end_date</span> <span class="o">&gt;</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Maximum period between start_date and end_date should be 5 weeks.&quot;</span><span class="p">,</span>  <span class="c1"># noqa</span>
+        <span class="p">)</span>
+
+    <span class="n">query_sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT</span>
+<span class="s2">                    *</span>
+<span class="s2">                FROM</span>
+<span class="s2">                    &#39;</span><span class="si">{</span><span class="n">weather_db</span><span class="si">}</span><span class="s2">&#39;</span>
+<span class="s2">                WHERE</span>
+<span class="s2">                    IdStationWho = &#39;</span><span class="si">{</span><span class="n">id_station_who</span><span class="si">}</span><span class="s2">&#39; AND</span>
+<span class="s2">                    Date &gt;= &#39;</span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2">&#39; AND</span>
+<span class="s2">                    Date &lt;= &#39;</span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">&#39;</span>
+<span class="s2">                &quot;&quot;&quot;</span>  <span class="c1"># nosec B608</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query_sql</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;There is no data to show. Rewrite your query.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
 <h2 id="app.main.list_station" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">list_station</span><span class="p">(</span><span class="n">IdStationWho</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">list_station</span><span class="p">(</span><span class="n">id_station_who</span><span class="p">)</span></code>
 
 </h2>
 
@@ -879,10 +1182,7 @@
 
           <details class="quote">
             <summary>Source code in <code>app/main.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
@@ -891,14 +1191,17 @@
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
-<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/stations/</span><span class="si">{IdStationWho}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">])</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/stations/</span><span class="si">{id_station_who}</span><span class="s2">/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">list_station</span><span class="p">(</span>
-    <span class="n">IdStationWho</span><span class="p">:</span> <span class="n">IdStationWhoType</span><span class="p">,</span>
+    <span class="n">id_station_who</span><span class="p">:</span> <span class="n">IdStationWhoType</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return information about a selected station using IdStationWho.&quot;&quot;&quot;</span>
     <span class="n">query_sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;SELECT *</span>
 <span class="s2">                    FROM &#39;</span><span class="si">{</span><span class="n">stations_db</span><span class="si">}</span><span class="s2">&#39;</span>
-<span class="s2">                    WHERE IdStationWho = &#39;</span><span class="si">{</span><span class="n">IdStationWho</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span>  <span class="c1"># nosec B608</span>
+<span class="s2">                    WHERE IdStationWho = &#39;</span><span class="si">{</span><span class="n">id_station_who</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span>  <span class="c1"># nosec B608</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query_sql</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">result</span>
@@ -939,10 +1242,7 @@ statements.</p>
 
           <details class="quote">
             <summary>Source code in <code>app/main.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
@@ -957,7 +1257,10 @@ statements.</p>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
-<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/stations/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">])</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/stations/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">list_stations</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the following information about all the stations.</span>
@@ -1015,10 +1318,7 @@ and ISO date format.</p>
 
           <details class="quote">
             <summary>Source code in <code>app/main.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 67</span>
 <span class="normal"> 68</span>
 <span class="normal"> 69</span>
 <span class="normal"> 70</span>
@@ -1054,7 +1354,10 @@ and ISO date format.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">query_db</span><span class="p">(</span><span class="n">sql_query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">query_db</span><span class="p">(</span><span class="n">sql_query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Execute a SQL query and return the results in JSON format.</span>
 
@@ -1117,10 +1420,10 @@ and ISO date format.</p>
 
           <details class="quote">
             <summary>Source code in <code>app/main.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">root</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Redirect user to API documentation.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
