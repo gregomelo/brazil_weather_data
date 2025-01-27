@@ -36,6 +36,7 @@ Ideally, the data collection pipeline would be set up to run automatically on a 
 This automated approach, combined with a more robust hosting solution, would make the project more dynamic and valuable for ongoing weather data analysis and research.
 
 ## Installation
+### Pyenv and Poetry
 To get started with the Brazil Weather Data API, follow these steps:
 1. Ensure you have [pyenv](https://github.com/pyenv/pyenv) and [Poetry](https://python-poetry.org/) installed on your system for dependency management.
 
@@ -54,6 +55,22 @@ To get started with the Brazil Weather Data API, follow these steps:
    poetry install --no-root
    poetry lock --no-update
    ```
+
+### Docker
+To get started with the Brazil Weather Data API, follow these steps:
+
+1. Ensure you have (Docker)[https://www.docker.com/] installed and free space (around 3GB),
+
+2. Clone the repository from GitHub:
+   ```bash
+   git clone https://github.com/gregomelo/brazil_weather_data.git
+   ```
+
+3. Run the command `docker build -t bwd-container .`.
+
+4. After completer, run the command `docker run -d -p 8000:8000 -p 8001:8001 bwd-container`.
+
+5. To use the API, open the address http://localhost:8000/. To read the documentation, open the address: http://localhost:8001/.
 
 ## Usage
 ### Starting the webservice API:
