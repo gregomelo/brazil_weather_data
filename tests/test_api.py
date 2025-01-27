@@ -106,7 +106,7 @@ class TestStationsRoute:
         expected column names, contain exactly one row, and the 'IdStationWho'
         column should match the requested station ID.
         """
-        response = test_client.get("/stations/A544")
+        response = test_client.get("/stations/A721")
 
         response_json = response.json()
 
@@ -119,7 +119,7 @@ class TestStationsRoute:
         assert response_df.columns.to_list() == [
             column for column in STATION_COLUMN_NAMES.values()
         ]
-        assert response_df["IdStationWho"][0] == "A544"
+        assert response_df["IdStationWho"][0] == "A721"
         assert response_number_rows == 1
 
     def test_station_invalid(
@@ -171,7 +171,7 @@ class TestWeatherRoute:
         self,
         test_client,
     ):
-        response = test_client.get("/weather/A544/2023-01-01/2023-01-02/")
+        response = test_client.get("/weather/A721/2023-01-01/2023-01-02/")
 
         response_json = response.json()
 
@@ -187,7 +187,7 @@ class TestWeatherRoute:
         self,
         test_client,
     ):
-        response = test_client.get("/weather/A544/2023-01-01/2023-05-02/")
+        response = test_client.get("/weather/A721/2023-01-01/2023-05-02/")
         response_json = response.json()
 
         assert response.status_code == 422
@@ -199,7 +199,7 @@ class TestWeatherRoute:
         self,
         test_client,
     ):
-        response = test_client.get("/weather/A544/2023-02-01/2023-01-02/")
+        response = test_client.get("/weather/A721/2023-02-01/2023-01-02/")
         response_json = response.json()
 
         assert response.status_code == 422
@@ -211,7 +211,7 @@ class TestWeatherRoute:
         self,
         test_client,
     ):
-        response = test_client.get("/weather/A544/2099-01-01/2099-01-02/")
+        response = test_client.get("/weather/A721/2099-01-01/2099-01-02/")
 
         assert response.status_code == 422
 
@@ -219,7 +219,7 @@ class TestWeatherRoute:
         self,
         test_client,
     ):
-        response = test_client.get("/weather/A000/1999-01-01/1999-01-02/")
+        response = test_client.get("/weather/A721/1999-01-01/1999-01-02/")
 
         response_json = response.json()
 
