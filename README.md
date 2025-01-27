@@ -37,15 +37,22 @@ This automated approach, combined with a more robust hosting solution, would mak
 
 ## Installation
 To get started with the Brazil Weather Data API, follow these steps:
-1. Ensure you have [Poetry](https://python-poetry.org/) installed on your system for dependency management.
-2. Clone the repository from GitHub:
+1. Ensure you have [pyenv](https://github.com/pyenv/pyenv) and [Poetry](https://python-poetry.org/) installed on your system for dependency management.
+
+2. Ensure you have the python version 3.11.11 avaiable in your system using the command `pyenv versions`. If 3.11.11 is not listed, use the command `pyenv install 3.11.11`.
+
+3. Clone the repository from GitHub:
    ```bash
    git clone https://github.com/gregomelo/brazil_weather_data.git
    ```
-3. Navigate to the cloned directory and install the dependencies using Poetry:
+
+4. Navigate to the cloned directory and install the dependencies using Poetry:
    ```bash
    cd brazil_weather_data
-   poetry install
+   pyenv local 3.11.11
+   poetry env use 3.11.11
+   poetry install --no-root
+   poetry lock --no-update
    ```
 
 ## Usage
