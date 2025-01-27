@@ -52,7 +52,7 @@ To get started with the Brazil Weather Data API, follow these steps:
 ### Starting the webservice API:
 1. Run the following commands:
    ```bash
-   poetry run task docs
+   poetry run task run
    ```
 2. Open your favorite browser and navigate to [Brazil Weather Data API](http://127.0.0.1:8000/docs).
 
@@ -60,14 +60,14 @@ Note: if your are running other service on 8000 port, you need to edit the runni
 
 If you want to kill all other process on 8000 port, you can use the command:
    ```bash
-   poetry run task killd
+   poetry run task killr
    ```
 
 ### Accessing local documentation:
 1. Run the following commands:
 
 ```bash
-poetry run task run
+poetry run task docs
 ```
 
 2. Open your favorite browser and navigate to [Brazil Weather Data API Docs](http://127.0.0.1:8001).
