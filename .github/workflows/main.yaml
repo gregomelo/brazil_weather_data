@@ -49,7 +49,7 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Install dependencies with poetry
-        run: poetry install --only docs --no-route
+        run: poetry install --only docs --no-root
 
       - name: Build and deploy MkDocs site
         run: poetry run mkdocs gh-deploy --force
